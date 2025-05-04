@@ -1,7 +1,7 @@
 import "@/styles/globals.css"
 
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import localFont from "next/font/local"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
 
@@ -11,7 +11,20 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const serif = localFont({
+  src: [
+    {
+      path: "./reg.ttf",
+      style: "normal",
+    },
+    {
+      path: "./reg-italic.ttf",
+      style: "italic",
+    },
+  ],
+  display: "swap",
+  variable: "--font-serif",
+})
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -73,14 +86,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head />
       <body
         className={cn(
-          "bg-background min-h-screen antialiased",
-          inter.className
+          "bg-background min-h-screen font-serif antialiased",
+          serif.variable
         )}
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          // enableSystem
           disableTransitionOnChange
         >
           {children}
