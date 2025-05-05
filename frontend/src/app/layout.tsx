@@ -9,6 +9,7 @@ import { env } from "@/env.mjs"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/sonner"
+import { Providers } from "@/components/providers"
 import { ThemeProvider } from "@/components/theme-provider"
 
 const serif = localFont({
@@ -96,8 +97,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
           // enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
         </ThemeProvider>
       </body>
       {env.NEXT_PUBLIC_GA_ID && (

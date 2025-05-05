@@ -1,9 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowDown, ChevronDown } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowLeftRight,
+  ArrowRight,
+  ChevronDown,
+  MoveRight,
+} from "lucide-react"
 
-import { DEFAULT_CURRENCY } from "@/config/currency"
+import { CURRENCIES, DEFAULT_CURRENCY } from "@/config/currency"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -14,6 +20,8 @@ import {
 } from "@/components/ui/card"
 import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input, TransparentInput } from "@/components/ui/input"
@@ -21,6 +29,7 @@ import { Currency } from "@/types"
 
 export default function Home() {
   const [coin, setCoin] = useState<Currency>(DEFAULT_CURRENCY)
+
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
       <h1 className="text-5xl font-stretch-condensed">
@@ -48,10 +57,25 @@ export default function Home() {
                       alt={coin.name}
                       className="size-4 rounded-full"
                     />
-                    <span className="font-bold">{coin.ticker}</span>
+                    <span className="font-semibold">{coin.ticker}</span>
                     <ChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {CURRENCIES.map((currency) => (
+                    <DropdownMenuItem
+                      key={currency.ticker}
+                      onClick={() => setCoin(currency)}
+                    >
+                      <img
+                        src={currency.logo}
+                        alt={currency.name}
+                        className="size-4 rounded-full"
+                      />
+                      <span className="font-semibold">{currency.ticker}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </CardContent>
@@ -63,11 +87,16 @@ export default function Home() {
             </CardTitle>
             <TransparentInput
               className="h-12 text-2xl!"
-              placeholder="mizt1aorevjidfi139xqakqz92"
+              placeholder="miztDhy1Nee3SEVEyvw7iAU2pDBbhKzuqpCwwSsTh4vHNfFF"
+              autoCorrect="false"
+              spellCheck="false"
             />
           </CardContent>
         </Card>
       </div>
+      <Button className="w-[500px]" variant="outline">
+        Transfer <MoveRight />
+      </Button>
     </main>
   )
 }
