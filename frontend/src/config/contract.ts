@@ -1,0 +1,12 @@
+export const contract = {
+  packageId:
+    "0x3745bc10d0e088e2ac3a81cb43a6b495da46ca63ad4151d7e0d146c97380302e",
+  miztId: "0x921e9812e6ff84b392b7f4682747966f9c2c022b42c733b765951680d3b03f73",
+  accountId:
+    "0xbd5962c89fee433ed55e7f273f5919c7ddea2ac634782c80afdb23ca5a3fe9ae",
+  nameOwnerId:
+    "0x5d3d88ebb29c58369cc38a9d90fcef59e281caaa3ab84e57e5ed86387497c3e6",
+  ephemeralPubId:
+    "0x200a64e03d61979e5624e369308efa15cb2391ba70bd98f84f66d9887510b99c",
+  nameId: "0x62a30b4faa804c212eaa2e71411ad13c903181a9e6afa3ab56966be8cf5c7dd6",
+}

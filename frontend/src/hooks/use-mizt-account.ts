@@ -8,12 +8,12 @@ import { persist } from "zustand/middleware"
 
 interface MiztKey {
   address: string
-  priv: Uint8Array
-  pub: Uint8Array
+  priv: number[]
+  pub: number[]
   mizt: string // mizt...
   lastSynced: number
   accounts: {
-    priv: Uint8Array
+    priv: number[]
     mizt: string // mizt...
   }[]
 }
@@ -38,8 +38,8 @@ export const useMiztAccount = create<MiztAccountState>()(
             ...state.key,
             [address]: {
               address,
-              pub,
-              priv,
+              pub: Array.from(pub),
+              priv: Array.from(priv),
               mizt: `mizt${mizt}`,
               lastSynced: Date.now(),
               accounts: [],
@@ -54,7 +54,7 @@ export const useMiztAccount = create<MiztAccountState>()(
         }
         const pub = new Uint8Array(key.pub)
         const rand = fromHex(generatePrivateKey(), "bytes")
-        const mizt = base58.encode(new Uint8Array([...pub, ...rand]))
+        const mizt = base58.encode(new Uint8Array([...rand, ...pub]))
 
         set((state) => ({
           key: {
@@ -67,7 +67,7 @@ export const useMiztAccount = create<MiztAccountState>()(
       },
     }),
     {
-      name: "mizt-account-1",
+      name: "mizt-account-2",
     }
   )
 )

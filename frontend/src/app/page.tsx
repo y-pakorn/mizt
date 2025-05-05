@@ -1,23 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import {
-  ArrowDown,
-  ArrowLeftRight,
-  ArrowRight,
-  ChevronDown,
-  MoveRight,
-} from "lucide-react"
+import { ArrowDown, ChevronDown, MoveRight } from "lucide-react"
 
 import { CURRENCIES, DEFAULT_CURRENCY } from "@/config/currency"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,6 +78,13 @@ export default function Home() {
               placeholder="miztDhy1Nee3SEVEyvw7iAU2pDBbhKzuqpCwwSsTh4vHNfFF"
               autoCorrect="false"
               spellCheck="false"
+              onPaste={(e) => {
+                e.preventDefault()
+                const text = e.clipboardData.getData("text")
+                const input = e.target as HTMLInputElement
+                input.setSelectionRange(0, 0)
+                document.execCommand("insertText", false, text)
+              }}
             />
           </CardContent>
         </Card>

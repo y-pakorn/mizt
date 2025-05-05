@@ -13,12 +13,15 @@ import {
   ChevronsLeftRightEllipsis,
   Copy,
   LogOut,
+  Pencil,
+  Plus,
   RefreshCcw,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztKey } from "@/hooks/use-mizt-key"
+import { useMiztName } from "@/hooks/use-mizt-name"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -27,10 +30,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ConnectWalletDialog,
   ConnectWalletDialogTrigger,
 } from "@/components/connect-wallet-dialog"
+import {
+  SetNameDialog,
+  SetNameDialogTrigger,
+} from "@/components/set-name-dialog"
 
 export default function Me() {
   const currentAccount = useCurrentAccount()
@@ -38,6 +46,8 @@ export default function Me() {
   const disconnect = useDisconnectWallet()
   const accounts = useAccounts()
   const switchAccount = useSwitchAccount()
+
+  const miztName = useMiztName({ address: currentAccount?.address })
 
   const mizt = useMiztAccount()
   const key = useMiztKey()
@@ -121,34 +131,72 @@ export default function Me() {
           Disconnect <LogOut />
         </Button>
       </div>
-      <div className="w-[500px]">
+      <div className="w-[500px] space-y-2">
+        <Tabs defaultValue="address">
+          <Card>
+            <CardContent className="space-y-2">
+              <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
+                <span className="font-bold! italic">Mizt</span>
+                <TabsList className="h-7 px-0.5 *:h-6 *:px-2 *:text-xs">
+                  <TabsTrigger value="address">Address</TabsTrigger>
+                  <TabsTrigger value="name">Name</TabsTrigger>
+                </TabsList>
+              </CardTitle>
+              <div className="h-12 text-2xl *:flex *:items-center *:justify-end *:gap-2">
+                <TabsContent value="address">
+                  <div className="mr-auto truncate">{key.mizt}</div>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    onClick={() => {
+                      mizt.generateNewAddress(currentAccount.address)
+                    }}
+                  >
+                    <RefreshCcw />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(key.mizt)
+                      toast.success("Mizt address copied to clipboard")
+                    }}
+                  >
+                    <Copy />
+                  </Button>
+                </TabsContent>
+                <TabsContent value="name">
+                  <div className="mr-auto truncate">
+                    {miztName.data ? `${miztName.data}.mizt` : "-"}
+                  </div>
+                  <SetNameDialog>
+                    <SetNameDialogTrigger asChild>
+                      <Button size="icon" variant="outline">
+                        {miztName.data ? <Pencil /> : <Plus />}
+                      </Button>
+                    </SetNameDialogTrigger>
+                  </SetNameDialog>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(key.mizt)
+                      toast.success("Mizt address copied to clipboard")
+                    }}
+                  >
+                    <Copy />
+                  </Button>
+                </TabsContent>
+              </div>
+            </CardContent>
+          </Card>
+        </Tabs>
+
         <Card>
           <CardContent className="space-y-2">
             <CardTitle className="text-muted-foreground text-sm">
-              <span className="font-bold! italic">Mizt</span> Address
+              Balances
             </CardTitle>
-            <div className="flex h-12 items-center justify-end gap-2 text-2xl">
-              <div className="mr-auto truncate">{key.mizt}</div>
-              <Button
-                size="icon"
-                variant="secondary"
-                onClick={() => {
-                  mizt.generateNewAddress(currentAccount.address)
-                }}
-              >
-                <RefreshCcw />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => {
-                  navigator.clipboard.writeText(key.mizt)
-                  toast.success("Mizt address copied to clipboard")
-                }}
-              >
-                <Copy />
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
