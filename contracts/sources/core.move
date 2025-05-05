@@ -15,6 +15,9 @@ use sui::transfer::share_object;
 #[error]
 const EInvalidSignature: vector<u8> = b"Invalid instruction signature";
 
+#[error]
+const ENameAlreadyRegistered: vector<u8> = b"Name already registered";
+
 public struct Name has drop, store {
     pub: vector<u8>,
     owner: address,
@@ -50,10 +53,10 @@ fun new_ephemeral_pub(mizt: &mut Mizt, ephemeral_pub: vector<u8>) {
 }
 
 public fun register_name(mizt: &mut Mizt, name: String, pub: vector<u8>, ctx: &mut TxContext) {
-    let has_name = mizt.name_owners.contains(ctx.sender());
+    assert!(!mizt.name_owners.contains(ctx.sender()), ENameAlreadyRegistered);
 
     // remove old name if exists
-    if (has_name) {
+    if (mizt.name_owners.contains(ctx.sender())) {
         let old_name = mizt.name_owners.remove(ctx.sender());
         mizt.names.remove(old_name);
     };
