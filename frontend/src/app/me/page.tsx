@@ -1,22 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import {
-  useAccounts,
-  useCurrentAccount,
-  useDisconnectWallet,
-  useSignPersonalMessage,
-  useSwitchAccount,
-} from "@mysten/dapp-kit"
+import { useCurrentAccount, useSignPersonalMessage } from "@mysten/dapp-kit"
 import { toBytes } from "@noble/hashes/utils"
-import {
-  ChevronLeft,
-  Copy,
-  MoveRight,
-  Pencil,
-  Plus,
-  RefreshCcw,
-} from "lucide-react"
+import { ChevronLeft, Copy, Pencil, Plus, RefreshCcw } from "lucide-react"
 import { toast } from "sonner"
 
 import { useMiztAccount } from "@/hooks/use-mizt-account"

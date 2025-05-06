@@ -1,17 +1,17 @@
+import { EventId, getFullnodeUrl, SuiClient } from "@mysten/sui/client"
 import { secp256k1 } from "@noble/curves/secp256k1"
 import { keccak_256 } from "@noble/hashes/sha3"
 import { base58 } from "@scure/base"
-import { fromHex } from "viem"
-import { generatePrivateKey } from "viem/accounts"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+
+import { contract } from "@/config/contract"
 
 interface MiztKey {
   address: string
   priv: number[]
   pub: number[]
   mizt: string // mizt...
-  lastSynced: number
   accounts: {
     priv: number[]
     mizt: string // mizt...
@@ -20,14 +20,20 @@ interface MiztKey {
 
 interface MiztAccountState {
   key: Record<string, MiztKey>
+  lastSynced: {
+    time: number
+    eventId: EventId | null
+  } | null
   generateKey: (seed: string, address: string) => void
   generateNewAddress: (address: string) => string
+  sync: () => Promise<void>
 }
 
 export const useMiztAccount = create<MiztAccountState>()(
   persist(
     (set, get) => ({
       key: {},
+      lastSynced: null,
       generateKey: (seed: string, address: string) => {
         const priv = keccak_256(seed)
         const pub = secp256k1.getPublicKey(priv)
@@ -41,7 +47,6 @@ export const useMiztAccount = create<MiztAccountState>()(
               pub: Array.from(pub),
               priv: Array.from(priv),
               mizt: `mizt${mizt}`,
-              lastSynced: Date.now(),
               accounts: [],
             },
           },
@@ -64,6 +69,41 @@ export const useMiztAccount = create<MiztAccountState>()(
         }))
 
         return mizt
+      },
+      sync: async () => {
+        const client = new SuiClient({
+          url: getFullnodeUrl("testnet"),
+        })
+        const mizt = get()
+        while (true) {
+          const events = await client.queryEvents({
+            query: {
+              MoveEventType: `${contract.packageId}::core::NewEphemeralPub`,
+            },
+            order: "ascending",
+            cursor: mizt.lastSynced?.eventId,
+            limit: 1000,
+          })
+
+          const pubkeys = events.data.map((e) => ({
+            ephemeral: new Uint8Array((e.parsedJson as any).ephemeral_pub),
+            shared: new Uint8Array((e.parsedJson as any).shared_pub),
+          }))
+
+          // for each pubkey, try to match with existing key
+          for (const pubkey of pubkeys) {
+          }
+
+          if (!events.hasNextPage) {
+            set({
+              lastSynced: {
+                eventId: events.nextCursor || null,
+                time: Date.now(),
+              },
+            })
+            break
+          }
+        }
       },
     }),
     {

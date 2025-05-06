@@ -7,8 +7,13 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit"
+import {
+  Secp256k1Keypair,
+  Secp256k1PublicKey,
+} from "@mysten/sui/keypairs/secp256k1"
 import { Transaction } from "@mysten/sui/transactions"
 import { secp256k1 } from "@noble/curves/secp256k1"
+import { keccak_256 } from "@noble/hashes/sha3"
 import { base58 } from "@scure/base"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { BigNumber } from "bignumber.js"
@@ -88,11 +93,15 @@ export default function Home() {
         const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
         const meta = decoded.slice(32)
         const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
+        const hashedSharedSecret = keccak_256(sharedSecret)
+        const addrPubkey = secp256k1.getSharedSecret(hashedSharedSecret, meta)
+        const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
         return {
           name: undefined,
           pubkey: {
             epimeralPubkey,
             sharedSecret,
+            addr,
           },
         }
       } catch (_) {
@@ -110,18 +119,19 @@ export default function Home() {
   const [nonce, setNonce] = useState<number>(0)
   const namePubkey = useMemo(() => {
     if (!_namePubkey.data) return null
-    const meta = _namePubkey.data.pub
+    const meta = new Uint8Array(_namePubkey.data.pub)
     const epimeralKey = secp256k1.utils.randomPrivateKey()
     const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
-    const sharedSecret = secp256k1.getSharedSecret(
-      epimeralKey,
-      new Uint8Array(meta)
-    )
+    const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
     const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
+    const hashedSharedSecret = keccak_256(sharedSecret)
+    const addrPubkey = secp256k1.getSharedSecret(hashedSharedSecret, meta)
+    const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
     return {
       epimeralPubkey,
       sharedSecret,
       mizt: `mizt${mizt}`,
+      addr,
     }
   }, [_namePubkey.data, nonce])
 
@@ -159,7 +169,7 @@ export default function Home() {
         target: `${contract.packageId}::core::transfer_coin_in`,
         arguments: [
           tx.object(contract.miztId),
-          tx.pure.vector("u8", usedPubkey.sharedSecret),
+          tx.pure.address(usedPubkey.addr),
           tx.pure.vector("u8", usedPubkey.epimeralPubkey),
           tx.object(splittedCoin),
         ],
@@ -281,25 +291,32 @@ export default function Home() {
                 document.execCommand("insertText", false, text)
               }}
             />
-            {namePubkey && (
-              <div className="text-muted-foreground flex items-center justify-end gap-2 text-xs">
-                <div className="mr-auto truncate">{namePubkey.mizt}</div>
-                <Button
-                  size="iconXs"
-                  variant="outlineTranslucent"
-                  onClick={() => setNonce((n) => n + 1)}
-                >
-                  <RefreshCcw
-                    className={cn(_namePubkey.isPending && "animate-spin")}
-                  />
-                </Button>
-              </div>
-            )}
-            {name && !namePubkey && (
-              <div className="text-muted-foreground flex h-6 items-center text-xs">
-                Name not found.
-              </div>
-            )}
+            <div>
+              {namePubkey && (
+                <div className="text-muted-foreground flex items-center justify-end gap-2 text-xs">
+                  <div className="mr-auto truncate">{namePubkey.mizt}</div>
+                  <Button
+                    size="iconXs"
+                    variant="outlineTranslucent"
+                    onClick={() => setNonce((n) => n + 1)}
+                  >
+                    <RefreshCcw
+                      className={cn(_namePubkey.isPending && "animate-spin")}
+                    />
+                  </Button>
+                </div>
+              )}
+              {(namePubkey?.addr || pubkey?.addr) && (
+                <div className="text-muted-foreground truncate text-xs">
+                  {namePubkey?.addr || pubkey?.addr}
+                </div>
+              )}
+              {name && !namePubkey && (
+                <div className="text-muted-foreground flex h-6 items-center text-xs">
+                  Name not found.
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
