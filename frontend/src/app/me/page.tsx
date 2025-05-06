@@ -43,7 +43,7 @@ import { DisconnectButton } from "@/components/disconnect-button"
 import {
   SendPrivateBalanceDialog,
   SendPrivateBalanceDialogTrigger,
-} from "@/components/send-private-balance.dialog"
+} from "@/components/send-private-balance-dialog"
 import {
   SetNameDialog,
   SetNameDialogTrigger,
