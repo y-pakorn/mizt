@@ -34,6 +34,7 @@ public struct Mizt has key, store {
 // events
 public struct NewEphemeralPub has copy, drop {
     ephemeral_pub: vector<u8>,
+    shared_pub: vector<u8>,
 }
 
 fun init(ctx: &mut TxContext) {
@@ -47,9 +48,9 @@ fun init(ctx: &mut TxContext) {
     share_object(mizt);
 }
 
-fun new_ephemeral_pub(mizt: &mut Mizt, ephemeral_pub: vector<u8>) {
+fun new_ephemeral_pub(mizt: &mut Mizt, ephemeral_pub: vector<u8>, shared_pub: vector<u8>) {
     mizt.ephemeral_pubs.push_back(ephemeral_pub);
-    emit(NewEphemeralPub { ephemeral_pub });
+    emit(NewEphemeralPub { ephemeral_pub, shared_pub });
 }
 
 public fun register_name(mizt: &mut Mizt, name: String, pub: vector<u8>, ctx: &mut TxContext) {
@@ -95,7 +96,7 @@ public fun transfer_coin_in<T>(
         old_coin.join(coin);
     };
 
-    new_ephemeral_pub(mizt, ephemeral_pub);
+    new_ephemeral_pub(mizt, ephemeral_pub, shared_pub);
 }
 
 public struct TransferInstruction<phantom T> has copy, drop {
