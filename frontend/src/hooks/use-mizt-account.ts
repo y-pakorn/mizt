@@ -88,10 +88,18 @@ export const useMiztAccount = create<MiztAccountState>()(
         set({
           isSyncing: true,
         })
+        console.log("Start syncing")
         const key = get().key[address]
-        if (!key) return
+        console.log("Key", key)
+        if (!key) {
+          set({
+            isSyncing: false,
+          })
+          return
+        }
         let cursor = key.lastSynced?.eventId
         while (true) {
+          console.log("Fetching events", cursor)
           const events = await client.queryEvents({
             query: {
               MoveEventType: `${contract.packageId}::core::NewEphemeralPub`,
@@ -100,6 +108,7 @@ export const useMiztAccount = create<MiztAccountState>()(
             cursor,
             limit: 1000,
           })
+          console.log("Events", events.data.length)
 
           const pubkeys = events.data.map((e) => ({
             ephemeral: new Uint8Array((e.parsedJson as any).ephemeral_pub),
@@ -155,6 +164,7 @@ export const useMiztAccount = create<MiztAccountState>()(
             cursor = events.nextCursor
           }
         }
+        console.log("Synced")
         set({
           isSyncing: false,
         })
