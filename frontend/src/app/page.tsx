@@ -10,21 +10,25 @@ import {
 import { Transaction } from "@mysten/sui/transactions"
 import { secp256k1 } from "@noble/curves/secp256k1"
 import { base58 } from "@scure/base"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { BigNumber } from "bignumber.js"
 import _ from "lodash"
 import {
   ArrowDown,
   ChevronDown,
+  ExternalLink,
+  Loader2,
   MoveRight,
   RefreshCcw,
   Wallet,
 } from "lucide-react"
+import { toast } from "sonner"
 
+import { contract } from "@/config/contract"
 import { CURRENCIES, DEFAULT_CURRENCY } from "@/config/currency"
 import { cn } from "@/lib/utils"
-import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztPubkey } from "@/hooks/use-mizt-pubkey"
-import { useTokenBalance } from "@/hooks/use-token-balance"
+import { refreshTokenBalance, useTokenBalance } from "@/hooks/use-token-balance"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -45,6 +49,7 @@ import { Currency } from "@/types"
 export default function Home() {
   const currentAccount = useCurrentAccount()
   const client = useSuiClient()
+  const queryClient = useQueryClient()
   const sae = useSignAndExecuteTransaction()
 
   const [amount, setAmount] = useState<string>("")
@@ -80,12 +85,13 @@ export default function Home() {
         const trimmed = recipient.replace(/^mizt/, "")
         const decoded = base58.decode(trimmed)
         const epimeralKey = decoded.slice(0, 32)
+        const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
         const meta = decoded.slice(32)
         const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
         return {
           name: undefined,
           pubkey: {
-            epimeralKey,
+            epimeralPubkey,
             sharedSecret,
           },
         }
@@ -119,12 +125,75 @@ export default function Home() {
     }
   }, [_namePubkey.data, nonce])
 
-  // const transfer = useMutation({
-  //   mutationFn: async () => {
-  //     if (!currentAccount) return
-  //     const tx = new Transaction()
-  //   },
-  // })
+  const transfer = useMutation({
+    mutationFn: async () => {
+      if (!currentAccount) return
+      if (!balance.data) throw new Error("No balance")
+      if (!amountNumber) throw new Error("Invalid amount")
+      if (amountNumber > balance.data.amount)
+        throw new Error("Insufficient balance")
+      const usedPubkey = namePubkey || pubkey
+      if (!usedPubkey) throw new Error("Invalid recipient")
+      const tx = new Transaction()
+      const fullAmount = new BigNumber(amountNumber)
+        .shiftedBy(
+          CURRENCIES.find((c) => c.coinType === coin.coinType)?.decimals ?? 9
+        )
+        .integerValue(BigNumber.ROUND_FLOOR)
+        .toString()
+      const mergedCoin =
+        coin.coinType === "0x2::sui::SUI"
+          ? tx.gas
+          : (() => {
+              const coins = balance.data.coins
+              if (coins.length === 1) return coins[0].coinObjectId
+              tx.mergeCoins(
+                coins[0].coinObjectId,
+                coins.slice(1).map((c) => c.coinObjectId)
+              )
+              return coins[0].coinObjectId
+            })()
+      const [splittedCoin] = tx.splitCoins(mergedCoin, [fullAmount])
+
+      tx.moveCall({
+        target: `${contract.packageId}::core::transfer_coin_in`,
+        arguments: [
+          tx.object(contract.miztId),
+          tx.pure.vector("u8", usedPubkey.sharedSecret),
+          tx.pure.vector("u8", usedPubkey.epimeralPubkey),
+          tx.object(splittedCoin),
+        ],
+        typeArguments: [coin.coinType],
+      })
+
+      const res = await sae.mutateAsync({
+        transaction: tx,
+      })
+
+      const result = await client.waitForTransaction({
+        digest: res.digest,
+      })
+
+      setAmount("")
+      setNonce((n) => n + 1)
+      refreshTokenBalance(queryClient, currentAccount.address, coin.coinType)
+      toast.success("Transferred successfully", {
+        description: `Tx Hash: ${result.digest}`,
+        action: {
+          label: <ExternalLink className="size-4" />,
+          onClick: () =>
+            window.open(
+              `${contract.blockExplorer}/tx/${result.digest}`,
+              "_blank"
+            ),
+        },
+      })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
       <h1 className="text-5xl font-stretch-condensed">
@@ -188,7 +257,7 @@ export default function Home() {
               <div className="flex-1" />
               <Wallet className="size-3" />
               <span className="font-semibold">
-                {balance.data?.toLocaleString()}
+                {balance.data?.amount.toLocaleString() || "-"}
               </span>
             </div>
           </CardContent>
@@ -235,8 +304,18 @@ export default function Home() {
         </Card>
       </div>
       {currentAccount ? (
-        <Button className="w-[500px]" variant="outline">
-          Transfer <MoveRight />
+        <Button
+          className="w-[500px]"
+          variant="outline"
+          disabled={transfer.isPending || !amountNumber || !recipient}
+          onClick={() => transfer.mutateAsync()}
+        >
+          {transfer.isPending ? "Transferring..." : "Transfer"}{" "}
+          {transfer.isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <MoveRight />
+          )}
         </Button>
       ) : (
         <ConnectWalletDialog>

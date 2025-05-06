@@ -9,4 +9,5 @@ export const contract = {
   ephemeralPubId:
     "0x200a64e03d61979e5624e369308efa15cb2391ba70bd98f84f66d9887510b99c",
   nameId: "0x62a30b4faa804c212eaa2e71411ad13c903181a9e6afa3ab56966be8cf5c7dd6",
+  blockExplorer: "https://suiscan.xyz/testnet",
 }

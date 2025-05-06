@@ -97,10 +97,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
           // enableSystem
           disableTransitionOnChange
         >
-          <Providers>
-            {children}
-            <Toaster />
-          </Providers>
+          <Providers>{children}</Providers>
+          <Toaster />
         </ThemeProvider>
       </body>
       {env.NEXT_PUBLIC_GA_ID && (
