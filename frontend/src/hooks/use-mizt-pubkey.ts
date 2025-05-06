@@ -3,7 +3,10 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query"
 
 import { contract } from "@/config/contract"
 
-type UseMiztPubkeyReturn = string | null
+type UseMiztPubkeyReturn = {
+  owner: string
+  pub: number[]
+} | null
 
 export const useMiztPubkey = <T>({
   name,
@@ -15,7 +18,7 @@ export const useMiztPubkey = <T>({
 
   return useQuery({
     queryKey: ["mizt-pubkey", name],
-    queryFn: async () => {
+    queryFn: async ({ queryKey: [, name] }) => {
       if (!name) return null
       const pubkey = await client.getDynamicFieldObject({
         parentId: contract.nameId,
@@ -24,8 +27,12 @@ export const useMiztPubkey = <T>({
           value: name,
         },
       })
-      console.log(pubkey.data?.content)
-      return (pubkey.data?.content as any)?.fields?.value?.fields?.owner || null
+      const fields = (pubkey.data?.content as any)?.fields?.value?.fields
+      if (!fields) return null
+      return {
+        owner: fields.owner as string,
+        pub: fields.pub as number[],
+      }
     },
     ...options,
   })

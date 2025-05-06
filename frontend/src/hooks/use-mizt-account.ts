@@ -31,7 +31,7 @@ export const useMiztAccount = create<MiztAccountState>()(
       generateKey: (seed: string, address: string) => {
         const priv = keccak_256(seed)
         const pub = secp256k1.getPublicKey(priv)
-        const rand = fromHex(generatePrivateKey(), "bytes")
+        const rand = secp256k1.utils.randomPrivateKey()
         const mizt = base58.encode(new Uint8Array([...pub, ...rand]))
         set((state) => ({
           key: {
@@ -53,7 +53,7 @@ export const useMiztAccount = create<MiztAccountState>()(
           return ""
         }
         const pub = new Uint8Array(key.pub)
-        const rand = fromHex(generatePrivateKey(), "bytes")
+        const rand = secp256k1.utils.randomPrivateKey()
         const mizt = base58.encode(new Uint8Array([...rand, ...pub]))
 
         set((state) => ({

@@ -46,7 +46,7 @@ export function SetNameDialog({
     name,
     select: (data) => {
       if (!data) return null
-      return data === currentAccount?.address
+      return data.owner === currentAccount?.address
     },
   })
   const { data: currentMiztName } = useMiztName({

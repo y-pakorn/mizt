@@ -8,15 +8,7 @@ import {
   useSwitchAccount,
 } from "@mysten/dapp-kit"
 import { toBytes } from "@noble/hashes/utils"
-import {
-  Check,
-  ChevronsLeftRightEllipsis,
-  Copy,
-  LogOut,
-  Pencil,
-  Plus,
-  RefreshCcw,
-} from "lucide-react"
+import { Copy, Pencil, Plus, RefreshCcw } from "lucide-react"
 import { toast } from "sonner"
 
 import { useMiztAccount } from "@/hooks/use-mizt-account"
@@ -24,28 +16,21 @@ import { useMiztKey } from "@/hooks/use-mizt-key"
 import { useMiztName } from "@/hooks/use-mizt-name"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ConnectWalletDialog,
   ConnectWalletDialogTrigger,
 } from "@/components/connect-wallet-dialog"
+import { DisconnectButton } from "@/components/disconnect-button"
 import {
   SetNameDialog,
   SetNameDialogTrigger,
 } from "@/components/set-name-dialog"
+import { SwitchAccountButton } from "@/components/switch-account-button"
 
 export default function Me() {
   const currentAccount = useCurrentAccount()
   const sign = useSignPersonalMessage()
-  const disconnect = useDisconnectWallet()
-  const accounts = useAccounts()
-  const switchAccount = useSwitchAccount()
 
   const miztName = useMiztName({ address: currentAccount?.address })
 
@@ -98,38 +83,8 @@ export default function Me() {
         <Button size="sm" variant="outlineTranslucent" aria-readonly>
           Active <div className="size-2 rounded-full bg-green-400" />
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outlineTranslucent">
-              Switch Account <ChevronsLeftRightEllipsis />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {accounts.map((account) => {
-              const isActive = account.address === currentAccount.address
-              return (
-                <DropdownMenuItem
-                  key={account.address}
-                  className="w-[250px]"
-                  onClick={() => switchAccount.mutate({ account })}
-                >
-                  <span className="font-semibold">{account.label}</span>
-                  <span className="text-muted-foreground">
-                    {account.address.slice(0, 8)}...
-                  </span>
-                  {isActive && <Check className="ml-auto size-4" />}
-                </DropdownMenuItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button
-          size="sm"
-          variant="outlineTranslucent"
-          onClick={() => disconnect.mutate()}
-        >
-          Disconnect <LogOut />
-        </Button>
+        <SwitchAccountButton />
+        <DisconnectButton />
       </div>
       <div className="w-[500px] space-y-2">
         <Tabs defaultValue="address">
