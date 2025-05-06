@@ -1,6 +1,7 @@
 import "@/styles/globals.css"
 
 import type { Metadata, Viewport } from "next"
+import { Geist_Mono } from "next/font/google"
 import localFont from "next/font/local"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
@@ -25,6 +26,11 @@ const serif = localFont({
   ],
   display: "swap",
   variable: "--font-serif",
+})
+
+const mono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
 })
 
 interface RootLayoutProps {
@@ -88,7 +94,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={cn(
           "bg-background min-h-screen font-serif antialiased",
-          serif.variable
+          serif.variable,
+          mono.variable
         )}
       >
         <ThemeProvider

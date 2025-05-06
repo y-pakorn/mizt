@@ -3,15 +3,38 @@
 import Link from "next/link"
 import { useCurrentAccount, useSignPersonalMessage } from "@mysten/dapp-kit"
 import { toBytes } from "@noble/hashes/utils"
-import { ChevronLeft, Copy, Pencil, Plus, RefreshCcw } from "lucide-react"
+import _ from "lodash"
+import {
+  ArrowRight,
+  ChevronLeft,
+  Copy,
+  Eye,
+  MoveRight,
+  Pencil,
+  Plus,
+  RefreshCcw,
+} from "lucide-react"
 import { toast } from "sonner"
 
+import { CURRENCIES } from "@/config/currency"
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztKey } from "@/hooks/use-mizt-key"
 import { useMiztName } from "@/hooks/use-mizt-name"
+import { usePrivateBalances } from "@/hooks/use-private-balances"
+import { useSync } from "@/hooks/use-sync"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  BalanceDetailDialog,
+  BalanceDetailDialogTrigger,
+} from "@/components/balance-detail-dialog"
 import {
   ConnectWalletDialog,
   ConnectWalletDialogTrigger,
@@ -31,6 +54,39 @@ export default function Me() {
 
   const mizt = useMiztAccount()
   const key = useMiztKey()
+
+  const privateBalances = usePrivateBalances({
+    refetchInterval: 30_000, // 30 seconds
+    select: (data) => {
+      return {
+        accounts: data,
+        coins: data.reduce(
+          (acc, account) => {
+            account.balance.forEach((balance) => {
+              if (!acc[balance.coinType]) {
+                acc[balance.coinType] = {
+                  total: 0,
+                  byAccount: {},
+                }
+              }
+              acc[balance.coinType].total += balance.amount
+              acc[balance.coinType].byAccount[account.address] = balance.amount
+            })
+            return acc
+          },
+          {} as Record<
+            string,
+            {
+              total: number
+              byAccount: Record<string, number>
+            }
+          >
+        ),
+      }
+    },
+  })
+
+  const __ = useSync()
 
   const signAndGenerate = async () => {
     if (!currentAccount) return
@@ -81,21 +137,29 @@ export default function Me() {
             Home
           </Button>
         </Link>
-        <Button size="sm" variant="outlineTranslucent" aria-readonly>
-          Active <div className="size-2 rounded-full bg-green-400" />
+        <Button size="sm" variant="outlineTranslucent">
+          {mizt.isSyncing ? (
+            <>
+              Syncing <div className="size-2 rounded-full bg-orange-400" />
+            </>
+          ) : (
+            <>
+              Active <div className="size-2 rounded-full bg-green-400" />
+            </>
+          )}
         </Button>
         <SwitchAccountButton />
         <DisconnectButton />
       </div>
       <div className="w-[500px] space-y-2">
-        <Tabs defaultValue="address">
+        <Tabs defaultValue="name">
           <Card>
             <CardContent className="space-y-2">
               <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
                 <span className="font-bold! italic">Mizt</span>
                 <TabsList className="h-7 px-0.5 *:h-6 *:px-2 *:text-xs">
-                  <TabsTrigger value="address">Address</TabsTrigger>
                   <TabsTrigger value="name">Name</TabsTrigger>
+                  <TabsTrigger value="address">Address</TabsTrigger>
                 </TabsList>
               </CardTitle>
               <div className="h-12 text-2xl *:flex *:items-center *:justify-end *:gap-2">
@@ -122,9 +186,19 @@ export default function Me() {
                   </Button>
                 </TabsContent>
                 <TabsContent value="name">
-                  <div className="mr-auto truncate">
-                    {miztName.data ? `${miztName.data}.mizt` : "-"}
-                  </div>
+                  {miztName.isPending ? (
+                    <Skeleton className="mr-auto h-9 w-full" />
+                  ) : miztName.data ? (
+                    <div className="mr-auto truncate">{miztName.data}.mizt</div>
+                  ) : (
+                    <div className="text-muted-foreground flex w-full items-center justify-between gap-2">
+                      <div>
+                        Setup Your{" "}
+                        <span className="font-bold italic">Mizt</span> Name
+                      </div>
+                      <MoveRight className="size-8" />
+                    </div>
+                  )}
                   <SetNameDialog>
                     <SetNameDialogTrigger asChild>
                       <Button size="icon" variant="outline">
@@ -153,6 +227,50 @@ export default function Me() {
             <CardTitle className="text-muted-foreground text-sm">
               Balances
             </CardTitle>
+            <CardDescription></CardDescription>
+            <div className="grid max-h-[200px] grid-cols-3 gap-2 overflow-y-auto">
+              {Object.entries(privateBalances.data?.coins || {}).map(
+                ([coinType, { total, byAccount }]) => {
+                  const currency = CURRENCIES.find(
+                    (c) => c.coinType === coinType
+                  )
+                  if (!currency) return null
+                  return (
+                    <div
+                      key={coinType}
+                      className="bg-background/30 rounded-lg p-3"
+                    >
+                      <div className="flex items-center gap-1">
+                        <div className="truncate font-medium">{total}</div>
+                        <img
+                          src={currency.logo}
+                          alt={currency.name}
+                          className="ml-auto size-4 shrink-0 rounded-full"
+                        />
+                        <div className="font-semibold">{currency.ticker}</div>
+                      </div>
+                      <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                        <div>{_.size(byAccount)} accounts</div>
+                        <BalanceDetailDialog
+                          coinType={coinType}
+                          balances={byAccount}
+                        >
+                          <BalanceDetailDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="iconXs"
+                              className="ml-auto"
+                            >
+                              <Eye />
+                            </Button>
+                          </BalanceDetailDialogTrigger>
+                        </BalanceDetailDialog>
+                      </div>
+                    </div>
+                  )
+                }
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

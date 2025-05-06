@@ -6,6 +6,7 @@
 
 @theme {
   --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));

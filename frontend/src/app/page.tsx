@@ -94,7 +94,11 @@ export default function Home() {
         const meta = decoded.slice(32)
         const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
         const hashedSharedSecret = keccak_256(sharedSecret)
-        const addrPubkey = secp256k1.getSharedSecret(hashedSharedSecret, meta)
+        const hashedSharedSecretPubkey =
+          secp256k1.getPublicKey(hashedSharedSecret)
+        const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
+          .add(secp256k1.ProjectivePoint.fromHex(hashedSharedSecretPubkey))
+          .toRawBytes()
         const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
         return {
           name: undefined,
@@ -125,7 +129,10 @@ export default function Home() {
     const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
     const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
     const hashedSharedSecret = keccak_256(sharedSecret)
-    const addrPubkey = secp256k1.getSharedSecret(hashedSharedSecret, meta)
+    const hashedSharedSecretPubkey = secp256k1.getPublicKey(hashedSharedSecret)
+    const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
+      .add(secp256k1.ProjectivePoint.fromHex(hashedSharedSecretPubkey))
+      .toRawBytes()
     const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
     return {
       epimeralPubkey,
@@ -156,12 +163,12 @@ export default function Home() {
           ? tx.gas
           : (() => {
               const coins = balance.data.coins
-              if (coins.length === 1) return coins[0].coinObjectId
+              if (coins.length === 1) return tx.object(coins[0].coinObjectId)
               tx.mergeCoins(
-                coins[0].coinObjectId,
-                coins.slice(1).map((c) => c.coinObjectId)
+                tx.object(coins[0].coinObjectId),
+                coins.slice(1).map((c) => tx.object(c.coinObjectId))
               )
-              return coins[0].coinObjectId
+              return tx.object(coins[0].coinObjectId)
             })()
       const [splittedCoin] = tx.splitCoins(mergedCoin, [fullAmount])
 
@@ -171,7 +178,7 @@ export default function Home() {
           tx.object(contract.miztId),
           tx.pure.address(usedPubkey.addr),
           tx.pure.vector("u8", usedPubkey.epimeralPubkey),
-          tx.object(splittedCoin),
+          splittedCoin,
         ],
         typeArguments: [coin.coinType],
       })
