@@ -253,15 +253,17 @@ export function SendPrivateBalanceDialog({
           <div>
             {txs.map((tx) => (
               <a
-                href={`https://suiv.io/tx/${tx}`}
+                href={`${contract.blockExplorer}/tx/${tx}`}
                 target="_blank"
                 className="inline-flex items-center gap-2 underline"
+                key={tx}
               >
                 {tx.slice(0, 12)}... <ArrowUpRight className="size-4" />
               </a>
             ))}
           </div>
         ),
+        duration: 10000, // 10 seconds
       })
       return txs
     },
