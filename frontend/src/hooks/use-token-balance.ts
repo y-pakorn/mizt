@@ -1,15 +1,19 @@
 import { useSuiClient } from "@mysten/dapp-kit"
-import { CoinBalance } from "@mysten/sui/client"
 import { useQuery, UseQueryOptions } from "@tanstack/react-query"
+import { BigNumber } from "bignumber.js"
 
-export const useTokenBalance = <T>({
+import { CURRENCIES } from "@/config/currency"
+
+export type UseTokenBalanceReturn = number | null
+
+export const useTokenBalance = <T = UseTokenBalanceReturn>({
   address,
   coinType,
   ...options
 }: {
   address?: string
   coinType?: string
-} & Partial<UseQueryOptions<CoinBalance | null, Error, T>>) => {
+} & Partial<UseQueryOptions<UseTokenBalanceReturn, Error, T>>) => {
   const client = useSuiClient()
   return useQuery({
     queryKey: ["token-balance", address, coinType],
@@ -19,7 +23,11 @@ export const useTokenBalance = <T>({
         owner: address,
         coinType,
       })
-      return balance
+      return new BigNumber(balance.totalBalance)
+        .shiftedBy(
+          -(CURRENCIES.find((c) => c.coinType === coinType)?.decimals ?? 9)
+        )
+        .toNumber()
     },
     ...options,
   })

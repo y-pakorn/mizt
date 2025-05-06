@@ -1,16 +1,30 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useCurrentAccount } from "@mysten/dapp-kit"
+import Link from "next/link"
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit"
+import { Transaction } from "@mysten/sui/transactions"
 import { secp256k1 } from "@noble/curves/secp256k1"
 import { base58 } from "@scure/base"
+import { useMutation } from "@tanstack/react-query"
 import _ from "lodash"
-import { ArrowDown, ChevronDown, MoveRight, RefreshCcw } from "lucide-react"
+import {
+  ArrowDown,
+  ChevronDown,
+  MoveRight,
+  RefreshCcw,
+  Wallet,
+} from "lucide-react"
 
 import { CURRENCIES, DEFAULT_CURRENCY } from "@/config/currency"
 import { cn } from "@/lib/utils"
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztPubkey } from "@/hooks/use-mizt-pubkey"
+import { useTokenBalance } from "@/hooks/use-token-balance"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -30,6 +44,8 @@ import { Currency } from "@/types"
 
 export default function Home() {
   const currentAccount = useCurrentAccount()
+  const client = useSuiClient()
+  const sae = useSignAndExecuteTransaction()
 
   const [amount, setAmount] = useState<string>("")
   const [coin, setCoin] = useState<Currency>(DEFAULT_CURRENCY)
@@ -39,6 +55,19 @@ export default function Home() {
   useEffect(() => {
     setAmount("")
   }, [coin])
+
+  const amountNumber = useMemo(() => {
+    try {
+      return parseFloat(amount)
+    } catch (_) {
+      return null
+    }
+  }, [amount])
+
+  const balance = useTokenBalance({
+    address: currentAccount?.address,
+    coinType: coin.coinType,
+  })
 
   const { name, pubkey } = useMemo(() => {
     if (recipient.endsWith(".mizt")) {
@@ -69,26 +98,33 @@ export default function Home() {
     }
   }, [recipient])
 
-  const namePubkey = useMiztPubkey({
+  const _namePubkey = useMiztPubkey({
     name,
-    select: (data) => {
-      if (!data) return null
-      const meta = data.pub
-      const epimeralKey = secp256k1.utils.randomPrivateKey()
-      const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
-      const sharedSecret = secp256k1.getSharedSecret(
-        epimeralKey,
-        new Uint8Array(data.pub)
-      )
-      const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
-      return {
-        epimeralPubkey,
-        sharedSecret,
-        mizt: `mizt${mizt}`,
-      }
-    },
   })
+  const [nonce, setNonce] = useState<number>(0)
+  const namePubkey = useMemo(() => {
+    if (!_namePubkey.data) return null
+    const meta = _namePubkey.data.pub
+    const epimeralKey = secp256k1.utils.randomPrivateKey()
+    const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
+    const sharedSecret = secp256k1.getSharedSecret(
+      epimeralKey,
+      new Uint8Array(meta)
+    )
+    const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
+    return {
+      epimeralPubkey,
+      sharedSecret,
+      mizt: `mizt${mizt}`,
+    }
+  }, [_namePubkey.data, nonce])
 
+  // const transfer = useMutation({
+  //   mutationFn: async () => {
+  //     if (!currentAccount) return
+  //     const tx = new Transaction()
+  //   },
+  // })
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
       <h1 className="text-5xl font-stretch-condensed">
@@ -116,7 +152,7 @@ export default function Home() {
               <TransparentInput
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="h-12 text-2xl!"
+                className="mb-0 h-10 text-2xl!"
                 placeholder="0"
               />
               <DropdownMenu>
@@ -148,6 +184,13 @@ export default function Home() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
+              <div className="flex-1" />
+              <Wallet className="size-3" />
+              <span className="font-semibold">
+                {balance.data?.toLocaleString()}
+              </span>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -169,22 +212,22 @@ export default function Home() {
                 document.execCommand("insertText", false, text)
               }}
             />
-            {namePubkey.data && (
+            {namePubkey && (
               <div className="text-muted-foreground flex items-center justify-end gap-2 text-xs">
-                <div className="mr-auto truncate">{namePubkey.data.mizt}</div>
+                <div className="mr-auto truncate">{namePubkey.mizt}</div>
                 <Button
-                  size="iconSm"
+                  size="iconXs"
                   variant="outlineTranslucent"
-                  onClick={() => namePubkey.refetch()}
+                  onClick={() => setNonce((n) => n + 1)}
                 >
                   <RefreshCcw
-                    className={cn(namePubkey.isPending && "animate-spin")}
+                    className={cn(_namePubkey.isPending && "animate-spin")}
                   />
                 </Button>
               </div>
             )}
-            {name && !namePubkey.data && !namePubkey.isPending && (
-              <div className="text-muted-foreground text-xs">
+            {name && !namePubkey && (
+              <div className="text-muted-foreground flex h-6 items-center text-xs">
                 Name not found.
               </div>
             )}
@@ -204,6 +247,11 @@ export default function Home() {
           </ConnectWalletDialogTrigger>
         </ConnectWalletDialog>
       )}
+      <Link href="/me">
+        <Button className="w-[500px]" variant="translucent">
+          Your <span className="font-bold italic">Mizt</span> Account
+        </Button>
+      </Link>
     </main>
   )
 }

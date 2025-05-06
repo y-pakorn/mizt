@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   useAccounts,
   useCurrentAccount,
@@ -8,7 +9,14 @@ import {
   useSwitchAccount,
 } from "@mysten/dapp-kit"
 import { toBytes } from "@noble/hashes/utils"
-import { Copy, Pencil, Plus, RefreshCcw } from "lucide-react"
+import {
+  ChevronLeft,
+  Copy,
+  MoveRight,
+  Pencil,
+  Plus,
+  RefreshCcw,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import { useMiztAccount } from "@/hooks/use-mizt-account"
@@ -80,6 +88,12 @@ export default function Me() {
         Manage your Mizt account and transactions.
       </p>
       <div className="flex items-center gap-4">
+        <Link href="/">
+          <Button size="sm" variant="outlineTranslucent">
+            <ChevronLeft />
+            Home
+          </Button>
+        </Link>
         <Button size="sm" variant="outlineTranslucent" aria-readonly>
           Active <div className="size-2 rounded-full bg-green-400" />
         </Button>

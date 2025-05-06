@@ -8,7 +8,7 @@ type UseMiztPubkeyReturn = {
   pub: number[]
 } | null
 
-export const useMiztPubkey = <T>({
+export const useMiztPubkey = <T = UseMiztPubkeyReturn>({
   name,
   ...options
 }: { name?: string } & Partial<
