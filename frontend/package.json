@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mysten/dapp-kit": "^0.16.2",
+    "@mysten/enoki": "^0.6.10",
     "@mysten/sui": "^1.29.1",
     "@next/third-parties": "^15.2.4",
     "@noble/curves": "^1.9.0",

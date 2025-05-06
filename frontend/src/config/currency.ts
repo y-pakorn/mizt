@@ -16,6 +16,14 @@ export const CURRENCIES: Currency[] = [
       "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
     decimals: 6,
   },
+  {
+    ticker: "WAL",
+    name: "Walrus",
+    logo: "https://strapi-dev.scand.app/uploads/WAL_4720dc612f.png",
+    coinType:
+      "0x8190b041122eb492bf63cb464476bd68c6b7e570a4079645a8b28732b6197a82::wal::WAL",
+    decimals: 9,
+  },
 ]
 
 export const DEFAULT_CURRENCY: Currency = CURRENCIES[0]

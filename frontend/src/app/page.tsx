@@ -314,7 +314,7 @@ export default function Home() {
                 </div>
               )}
               {(namePubkey?.addr || pubkey?.addr) && (
-                <div className="text-muted-foreground truncate text-xs">
+                <div className="text-muted-foreground truncate font-mono text-xs">
                   {namePubkey?.addr || pubkey?.addr}
                 </div>
               )}

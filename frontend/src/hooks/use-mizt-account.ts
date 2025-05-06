@@ -6,6 +6,7 @@ import {
 import { secp256k1 } from "@noble/curves/secp256k1"
 import { keccak_256 } from "@noble/hashes/sha3"
 import { base58 } from "@scure/base"
+import _ from "lodash"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
@@ -34,6 +35,7 @@ interface MiztAccountState {
   generateKey: (seed: string, address: string) => void
   generateNewAddress: (address: string) => string
   sync: (address: string) => Promise<void>
+  removeAccounts: (address: string, removeAccounts: string[]) => void
   isSyncing: boolean
 }
 
@@ -157,7 +159,19 @@ export const useMiztAccount = create<MiztAccountState>()(
           isSyncing: false,
         })
       },
+      removeAccounts: (address: string, removeAccounts: string[]) => {
+        set((state) => ({
+          key: {
+            ...state.key,
+            [address]: {
+              ...state.key[address],
+              accounts: _.omit(state.key[address].accounts, removeAccounts),
+            },
+          },
+        }))
+      },
     }),
+
     {
       name: "mizt-account-2",
     }

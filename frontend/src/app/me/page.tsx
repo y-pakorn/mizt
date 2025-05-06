@@ -41,6 +41,10 @@ import {
 } from "@/components/connect-wallet-dialog"
 import { DisconnectButton } from "@/components/disconnect-button"
 import {
+  SendPrivateBalanceDialog,
+  SendPrivateBalanceDialogTrigger,
+} from "@/components/send-private-balance.dialog"
+import {
   SetNameDialog,
   SetNameDialogTrigger,
 } from "@/components/set-name-dialog"
@@ -124,19 +128,16 @@ export default function Me() {
 
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
-      <h1 className="text-5xl font-stretch-condensed">
+      <h1 className="inline-flex items-center gap-2 text-5xl font-stretch-condensed">
+        <Link href="/">
+          <ChevronLeft className="size-8" />
+        </Link>
         Your <span className="font-bold italic">Mizt</span> Account
       </h1>
       <p className="text-muted-foreground">
         Manage your Mizt account and transactions.
       </p>
       <div className="flex items-center gap-4">
-        <Link href="/">
-          <Button size="sm" variant="outlineTranslucent">
-            <ChevronLeft />
-            Home
-          </Button>
-        </Link>
         <Button size="sm" variant="outlineTranslucent">
           {mizt.isSyncing ? (
             <>
@@ -148,6 +149,17 @@ export default function Me() {
             </>
           )}
         </Button>
+        <Button
+          size="sm"
+          variant="outlineTranslucent"
+          onClick={() => {
+            navigator.clipboard.writeText(currentAccount.address)
+            toast.success("Address copied to clipboard")
+          }}
+        >
+          Copy Address <Copy />
+        </Button>
+
         <SwitchAccountButton />
         <DisconnectButton />
       </div>
@@ -210,8 +222,8 @@ export default function Me() {
                     size="icon"
                     variant="outline"
                     onClick={() => {
-                      navigator.clipboard.writeText(key.mizt)
-                      toast.success("Mizt address copied to clipboard")
+                      navigator.clipboard.writeText(`${miztName.data}.mizt`)
+                      toast.success("Mizt name copied to clipboard")
                     }}
                   >
                     <Copy />
@@ -228,7 +240,7 @@ export default function Me() {
               Balances
             </CardTitle>
             <CardDescription></CardDescription>
-            <div className="grid max-h-[200px] grid-cols-3 gap-2 overflow-y-auto">
+            <div className="grid max-h-[200px] grid-cols-2 gap-2 overflow-y-auto">
               {Object.entries(privateBalances.data?.coins || {}).map(
                 ([coinType, { total, byAccount }]) => {
                   const currency = CURRENCIES.find(
@@ -241,13 +253,28 @@ export default function Me() {
                       className="bg-background/30 rounded-lg p-3"
                     >
                       <div className="flex items-center gap-1">
-                        <div className="truncate font-medium">{total}</div>
+                        <div className="truncate font-medium">
+                          {total.toLocaleString()}
+                        </div>
                         <img
                           src={currency.logo}
                           alt={currency.name}
-                          className="ml-auto size-4 shrink-0 rounded-full"
+                          className="ml-auto size-3 shrink-0 rounded-full"
                         />
-                        <div className="font-semibold">{currency.ticker}</div>
+                        <div className="text-sm font-semibold">
+                          {currency.ticker}
+                        </div>
+                        <SendPrivateBalanceDialog
+                          coinType={coinType}
+                          total={total}
+                          balances={byAccount}
+                        >
+                          <SendPrivateBalanceDialogTrigger asChild>
+                            <Button variant="outlineTranslucent" size="iconXs">
+                              <ArrowRight />
+                            </Button>
+                          </SendPrivateBalanceDialogTrigger>
+                        </SendPrivateBalanceDialog>
                       </div>
                       <div className="text-muted-foreground flex items-center gap-1 text-xs">
                         <div>{_.size(byAccount)} accounts</div>
