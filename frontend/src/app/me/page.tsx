@@ -241,61 +241,75 @@ export default function Me() {
             </CardTitle>
             <CardDescription></CardDescription>
             <div className="grid max-h-[200px] grid-cols-2 gap-2 overflow-y-auto">
-              {Object.entries(privateBalances.data?.coins || {}).map(
-                ([coinType, { total, byAccount }]) => {
-                  const currency = CURRENCIES.find(
-                    (c) => c.coinType === coinType
-                  )
-                  if (!currency) return null
-                  return (
-                    <div
-                      key={coinType}
-                      className="bg-background/30 rounded-lg p-3"
-                    >
-                      <div className="flex items-center gap-1">
-                        <div className="truncate font-medium">
-                          {total.toLocaleString()}
+              {privateBalances.isPending ? (
+                _.range(2).map((i) => (
+                  <Skeleton key={i} className="h-18 w-full" />
+                ))
+              ) : !privateBalances.data ||
+                !_.size(privateBalances.data?.coins) ? (
+                <div className="text-muted-foreground/25 col-span-2 flex h-18 items-center justify-center text-center">
+                  No balances here yet.
+                </div>
+              ) : (
+                _.entries(privateBalances.data?.coins).map(
+                  ([coinType, { total, byAccount }]) => {
+                    const currency = CURRENCIES.find(
+                      (c) => c.coinType === coinType
+                    )
+                    if (!currency) return null
+                    return (
+                      <div
+                        key={coinType}
+                        className="bg-background/30 rounded-lg p-3"
+                      >
+                        <div className="flex items-center gap-1">
+                          <div className="truncate font-medium">
+                            {total.toLocaleString()}
+                          </div>
+                          <img
+                            src={currency.logo}
+                            alt={currency.name}
+                            className="ml-auto size-3 shrink-0 rounded-full"
+                          />
+                          <div className="text-sm font-semibold">
+                            {currency.ticker}
+                          </div>
+                          <SendPrivateBalanceDialog
+                            coinType={coinType}
+                            total={total}
+                            balances={byAccount}
+                          >
+                            <SendPrivateBalanceDialogTrigger asChild>
+                              <Button
+                                variant="outlineTranslucent"
+                                size="iconXs"
+                              >
+                                <ArrowRight />
+                              </Button>
+                            </SendPrivateBalanceDialogTrigger>
+                          </SendPrivateBalanceDialog>
                         </div>
-                        <img
-                          src={currency.logo}
-                          alt={currency.name}
-                          className="ml-auto size-3 shrink-0 rounded-full"
-                        />
-                        <div className="text-sm font-semibold">
-                          {currency.ticker}
+                        <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                          <div>{_.size(byAccount)} accounts</div>
+                          <BalanceDetailDialog
+                            coinType={coinType}
+                            balances={byAccount}
+                          >
+                            <BalanceDetailDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="iconXs"
+                                className="ml-auto"
+                              >
+                                <Eye />
+                              </Button>
+                            </BalanceDetailDialogTrigger>
+                          </BalanceDetailDialog>
                         </div>
-                        <SendPrivateBalanceDialog
-                          coinType={coinType}
-                          total={total}
-                          balances={byAccount}
-                        >
-                          <SendPrivateBalanceDialogTrigger asChild>
-                            <Button variant="outlineTranslucent" size="iconXs">
-                              <ArrowRight />
-                            </Button>
-                          </SendPrivateBalanceDialogTrigger>
-                        </SendPrivateBalanceDialog>
                       </div>
-                      <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                        <div>{_.size(byAccount)} accounts</div>
-                        <BalanceDetailDialog
-                          coinType={coinType}
-                          balances={byAccount}
-                        >
-                          <BalanceDetailDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="iconXs"
-                              className="ml-auto"
-                            >
-                              <Eye />
-                            </Button>
-                          </BalanceDetailDialogTrigger>
-                        </BalanceDetailDialog>
-                      </div>
-                    </div>
-                  )
-                }
+                    )
+                  }
+                )
               )}
             </div>
           </CardContent>
