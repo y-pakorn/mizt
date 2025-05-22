@@ -217,7 +217,8 @@ export default function Home() {
         Hide your coin in the <span className="font-bold italic">Mizt</span>
       </h1>
       <p className="text-muted-foreground">
-        To the unknown, in the void of the cryptography.
+        To the unknown, in the void of the cryptography on{" "}
+        <span className="font-medium">Mainnet</span>.
       </p>
       {currentAccount && (
         <div className="flex items-center gap-4">

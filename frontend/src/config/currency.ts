@@ -13,7 +13,7 @@ export const CURRENCIES: Currency[] = [
     name: "USD Coin",
     logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/3408.png",
     coinType:
-      "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+      "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
     decimals: 6,
   },
   {
@@ -21,7 +21,7 @@ export const CURRENCIES: Currency[] = [
     name: "Walrus",
     logo: "https://strapi-dev.scand.app/uploads/WAL_4720dc612f.png",
     coinType:
-      "0x8190b041122eb492bf63cb464476bd68c6b7e570a4079645a8b28732b6197a82::wal::WAL",
+      "0x356a26eb9e012a68958082340d4c4116e7f55615cf27affcff209cf0ae544f59::wal::WAL",
     decimals: 9,
   },
 ]
