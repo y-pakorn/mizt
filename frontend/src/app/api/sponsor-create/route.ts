@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { EnokiClient } from "@mysten/enoki"
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client"
 import { Transaction } from "@mysten/sui/transactions"
-import {
-  buildGaslessTransaction,
-  createSuiClient,
-  GasStationClient,
-} from "@shinami/clients/sui"
 import { z } from "zod"
 
 import { env } from "@/env.mjs"
@@ -34,7 +29,7 @@ export async function POST(request: NextRequest) {
     await requestSchema.parseAsync(await request.json())
 
   const sui = new SuiClient({
-    url: getFullnodeUrl("testnet"),
+    url: getFullnodeUrl("mainnet"),
   })
   const enoki = new EnokiClient({
     apiKey: env.ENOKI_API_KEY,
@@ -78,7 +73,7 @@ export async function POST(request: NextRequest) {
 
   const sponsoredResponse = await enoki.createSponsoredTransaction({
     transactionKindBytes: Buffer.from(tx).toString("base64"),
-    network: "testnet",
+    network: "mainnet",
     sender,
     allowedAddresses: [recipient.address],
     allowedMoveCallTargets: [`${contract.packageId}::core::transfer_coin_in`],

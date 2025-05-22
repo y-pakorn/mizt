@@ -83,7 +83,7 @@ export const useMiztAccount = create<MiztAccountState>()(
       },
       sync: async (address: string) => {
         const client = new SuiClient({
-          url: getFullnodeUrl("testnet"),
+          url: getFullnodeUrl("mainnet"),
         })
         set({
           isSyncing: true,
