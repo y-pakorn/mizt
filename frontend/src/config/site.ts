@@ -10,6 +10,6 @@ export const siteConfig = {
     author: "yoisha",
   },
   twitter: "",
-  favicon: "/favicon.ico",
+  favicon: "/logo.webp",
   ogImage: `${env.NEXT_PUBLIC_APP_URL}/og.jpg`,
 }

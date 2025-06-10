@@ -103,6 +103,10 @@ export default function Me() {
   if (!currentAccount || !key) {
     return (
       <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
+        <h2 className="inline-flex items-center gap-1">
+          <img src="/logo.webp" alt="Mizt" className="size-7" />
+          <span className="text-2xl font-semibold italic">mizt</span>
+        </h2>
         <h1 className="text-5xl font-stretch-condensed">
           Sign In To Access Your <span className="font-bold italic">Mizt</span>{" "}
           Account
@@ -128,6 +132,10 @@ export default function Me() {
 
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
+      <h2 className="inline-flex items-center gap-1">
+        <img src="/logo.webp" alt="Mizt" className="size-7" />
+        <span className="text-2xl font-semibold italic">mizt</span>
+      </h2>
       <h1 className="inline-flex items-center gap-2 text-5xl font-stretch-condensed">
         <Link href="/">
           <ChevronLeft className="size-8" />

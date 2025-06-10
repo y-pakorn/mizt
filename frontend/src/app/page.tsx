@@ -213,6 +213,10 @@ export default function Home() {
 
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
+      <h2 className="inline-flex items-center gap-1">
+        <img src="/logo.webp" alt="Mizt" className="size-7" />
+        <span className="text-2xl font-semibold italic">mizt</span>
+      </h2>
       <h1 className="text-5xl font-stretch-condensed">
         Hide your coin in the <span className="font-bold italic">Mizt</span>
       </h1>
