@@ -113,20 +113,20 @@ export const useMiztAccount = create<MiztAccountState>()(
 
           // for each pubkey, try to match with existing key
           for (const pubkey of pubkeys) {
-            // calculate target address based on ephemeral pubkey
-            const sharedSecret = secp256k1.getSharedSecret(
-              new Uint8Array(key.priv),
+            const sharedSecret = secp256k1.ProjectivePoint.fromHex(
               pubkey.ephemeral
             )
-            const hashedSharedSecret = keccak_256(sharedSecret)
+              .multiply(secp256k1.CURVE.Fp.fromBytes(new Uint8Array(key.priv)))
+              .toRawBytes()
             const addrPrivateKey = secp256k1.CURVE.Fp.toBytes(
               secp256k1.CURVE.Fp.add(
                 secp256k1.CURVE.Fp.fromBytes(new Uint8Array(key.priv)),
-                secp256k1.CURVE.Fp.fromBytes(hashedSharedSecret)
+                secp256k1.CURVE.Fp.fromBytes(keccak_256(sharedSecret))
               )
             )
             const keypair = Secp256k1Keypair.fromSecretKey(addrPrivateKey)
             const addr = keypair.toSuiAddress()
+            console.log(addr, pubkey.addr)
             if (addr === pubkey.addr) {
               key.accounts[addr] = {
                 suiPriv: [...addrPrivateKey],

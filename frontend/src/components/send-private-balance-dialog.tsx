@@ -140,9 +140,13 @@ export function SendPrivateBalanceDialog({
     const meta = new Uint8Array(_namePubkey.data.pub)
     const epimeralKey = secp256k1.utils.randomPrivateKey()
     const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
-    const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
+    const sharedSecret = secp256k1.ProjectivePoint.fromHex(meta).multiply(
+      secp256k1.CURVE.Fp.fromBytes(epimeralKey)
+    )
     const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
-    const hashedSharedSecret = keccak_256(sharedSecret)
+    const hashedSharedSecret = secp256k1.CURVE.Fp.fromBytes(
+      keccak_256(sharedSecret.toRawBytes())
+    )
     const hashedSharedSecretPubkey = secp256k1.getPublicKey(hashedSharedSecret)
     const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
       .add(secp256k1.ProjectivePoint.fromHex(hashedSharedSecretPubkey))
@@ -391,6 +395,7 @@ export function SendPrivateBalanceDialog({
               </Tabs>
             </CardContent>
           </Card>
+          <div className="text-muted-foreground text-xs"></div>
         </div>
         <Button
           className="w-full"
