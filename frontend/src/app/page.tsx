@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
@@ -52,6 +53,29 @@ import { SwitchAccountButton } from "@/components/switch-account-button"
 import { Currency } from "@/types"
 
 export default function Home() {
+  const searchParams = useSearchParams()
+
+  const [message, setMessage] = useState<string>("")
+  useEffect(() => {
+    const message = searchParams.get("message")
+    const amount = searchParams.get("amount")
+    const coin = searchParams.get("coin")
+    const key = searchParams.get("key")
+
+    if (!amount || !key || !coin) {
+      setAmount("")
+      setCoin(DEFAULT_CURRENCY)
+      setRecipient("")
+      setDisplayRecipient("")
+      return
+    }
+    setMessage(message ?? "")
+    setAmount(amount)
+    setCoin(CURRENCIES.find((c) => c.coinType === coin) ?? DEFAULT_CURRENCY)
+    setRecipient(key)
+    setDisplayRecipient(key)
+  }, [searchParams])
+
   const currentAccount = useCurrentAccount()
   const client = useSuiClient()
   const queryClient = useQueryClient()
@@ -60,11 +84,8 @@ export default function Home() {
   const [amount, setAmount] = useState<string>("")
   const [coin, setCoin] = useState<Currency>(DEFAULT_CURRENCY)
   const [recipient, setRecipient] = useState<string>("")
+  const [displayRecipient, setDisplayRecipient] = useState<string>("")
   const setRecipientDebounce = useMemo(() => _.debounce(setRecipient, 500), [])
-
-  useEffect(() => {
-    setAmount("")
-  }, [coin])
 
   const amountNumber = useMemo(() => {
     try {
@@ -92,8 +113,12 @@ export default function Home() {
         const epimeralKey = decoded.slice(0, 32)
         const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
         const meta = decoded.slice(32)
-        const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
-        const hashedSharedSecret = keccak_256(sharedSecret)
+        const sharedSecret = secp256k1.ProjectivePoint.fromHex(meta).multiply(
+          secp256k1.CURVE.Fp.fromBytes(epimeralKey)
+        )
+        const hashedSharedSecret = secp256k1.CURVE.Fp.fromBytes(
+          keccak_256(sharedSecret.toRawBytes())
+        )
         const hashedSharedSecretPubkey =
           secp256k1.getPublicKey(hashedSharedSecret)
         const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
@@ -217,17 +242,30 @@ export default function Home() {
 
   return (
     <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
-      <h2 className="inline-flex items-center gap-1">
-        <img src="/logo.webp" alt="Mizt" className="size-7" />
-        <span className="text-2xl font-semibold italic">mizt</span>
-      </h2>
-      <h1 className="text-5xl font-stretch-condensed">
-        Hide your coin in the <span className="font-bold italic">Mizt</span>
-      </h1>
-      <p className="text-muted-foreground">
-        To the unknown, in the void of the cryptography on{" "}
-        <span className="font-medium">Mainnet</span>.
-      </p>
+      <Link href="/">
+        <h2 className="inline-flex items-center gap-1">
+          <img src="/logo.webp" alt="Mizt" className="size-7" />
+          <span className="text-2xl font-semibold italic">mizt</span>
+        </h2>
+      </Link>
+      {message ? (
+        <>
+          <h1 className="text-5xl font-stretch-condensed">{message}</h1>
+          <p className="text-muted-foreground">
+            Hide your coin in the <span className="font-bold italic">Mizt</span>
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="text-5xl font-stretch-condensed">
+            Hide your coin in the <span className="font-bold italic">Mizt</span>
+          </h1>
+          <p className="text-muted-foreground">
+            To the unknown, in the void of the cryptography on{" "}
+            <span className="font-medium">Mainnet</span>.
+          </p>
+        </>
+      )}
       {currentAccount && (
         <div className="flex items-center gap-4">
           <SwitchAccountButton />
@@ -266,7 +304,10 @@ export default function Home() {
                   {CURRENCIES.map((currency) => (
                     <DropdownMenuItem
                       key={currency.ticker}
-                      onClick={() => setCoin(currency)}
+                      onClick={() => {
+                        setCoin(currency)
+                        setAmount("")
+                      }}
                     >
                       <img
                         src={currency.logo}
@@ -294,7 +335,11 @@ export default function Home() {
               <span className="font-bold! italic">Mizt</span> Recipient
             </CardTitle>
             <TransparentInput
-              onChange={(e) => setRecipientDebounce(e.target.value)}
+              value={displayRecipient}
+              onChange={(e) => {
+                setRecipientDebounce(e.target.value)
+                setDisplayRecipient(e.target.value)
+              }}
               className="mb-0 h-10 text-2xl!"
               placeholder="muasist.mizt or miztDhy1Nee3SEV..."
               autoCorrect="false"

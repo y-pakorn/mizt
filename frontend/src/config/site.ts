@@ -11,5 +11,6 @@ export const siteConfig = {
   },
   twitter: "",
   favicon: "/logo.webp",
-  ogImage: `${env.NEXT_PUBLIC_APP_URL}/og.jpg`,
+  ogImage: "https://i.ibb.co/wNjNy1Hs/og.webp",
+  ogRequestPaymentImage: "https://i.ibb.co/7dYnPdh9/ogrequest.webp",
 }

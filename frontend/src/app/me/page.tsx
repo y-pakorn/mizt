@@ -39,6 +39,10 @@ import {
   ConnectWalletDialog,
   ConnectWalletDialogTrigger,
 } from "@/components/connect-wallet-dialog"
+import {
+  CreatePaymentLinkDialog,
+  CreatePaymentLinkDialogTrigger,
+} from "@/components/create-payment-link-dialog"
 import { DisconnectButton } from "@/components/disconnect-button"
 import {
   SendPrivateBalanceDialog,
@@ -204,6 +208,13 @@ export default function Me() {
                   >
                     <Copy />
                   </Button>
+                  <CreatePaymentLinkDialog>
+                    <CreatePaymentLinkDialogTrigger asChild>
+                      <Button variant="outlineTranslucent">
+                        Create Payment Link
+                      </Button>
+                    </CreatePaymentLinkDialogTrigger>
+                  </CreatePaymentLinkDialog>
                 </TabsContent>
                 <TabsContent value="name">
                   {miztName.isPending ? (
