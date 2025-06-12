@@ -26,4 +26,6 @@ export const CURRENCIES: Currency[] = [
   },
 ]
 
+export const SUI_CURRENCY: Currency = CURRENCIES[0]!
+
 export const DEFAULT_CURRENCY: Currency = CURRENCIES[0]

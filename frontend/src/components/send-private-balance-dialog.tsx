@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner"
 
 import { contract } from "@/config/contract"
-import { CURRENCIES } from "@/config/currency"
+import { CURRENCIES, SUI_CURRENCY } from "@/config/currency"
 import { cn } from "@/lib/utils"
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztKey } from "@/hooks/use-mizt-key"
@@ -395,7 +395,16 @@ export function SendPrivateBalanceDialog({
               </Tabs>
             </CardContent>
           </Card>
-          <div className="text-muted-foreground text-xs"></div>
+          <div className="inline-flex w-full items-center gap-1 text-sm font-medium">
+            Transaction Fees{" "}
+            <span className="ml-auto line-through">{0.00173}</span> FREE{" "}
+            <img
+              src={SUI_CURRENCY.logo}
+              alt={SUI_CURRENCY.name}
+              className="size-4 rounded-full"
+            />
+            <span className="font-bold italic">Sponsored Transaction</span>
+          </div>
         </div>
         <Button
           className="w-full"
