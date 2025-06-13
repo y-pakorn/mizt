@@ -28,6 +28,7 @@ export async function generateMetadata(
           url: siteConfig.ogRequestPaymentImage,
           width: 1200,
           height: 630,
+          alt: `${amount} ${ticker} - "${message}"`,
         },
       ],
     },
