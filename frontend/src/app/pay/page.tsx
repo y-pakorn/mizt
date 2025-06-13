@@ -15,9 +15,8 @@ type Props = {
 
 export async function generateMetadata(
   { searchParams }: Props,
-  parent: ResolvingMetadata
+  _: ResolvingMetadata
 ): Promise<Metadata> {
-  const previousImages = (await parent).openGraph?.images || []
   const { message, amount, coin } = await searchParams
   const ticker = CURRENCIES.find((c) => c.coinType === coin)?.ticker
   return {
@@ -25,7 +24,6 @@ export async function generateMetadata(
     description: `Private payment requested by a Mizt account, ${amount} ${ticker}. "${message}"`,
     openGraph: {
       images: [
-        ...previousImages,
         {
           url: siteConfig.ogRequestPaymentImage,
           width: 1200,
