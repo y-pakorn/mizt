@@ -10,7 +10,7 @@ Mizt is a fully open-source privacy DApp that introduces stealth addresses to th
 
 - Client-Side Account Management: Full local key and note discovery across multiple devices—no server, no compromise.
 
-- Live on Mainnet: Actively operating at mizt.tetrationlab.com, focused on SUI coin transfers today, but extensible to any Sui object.
+- Live on Mainnet: Actively operating at [mizt.xyz](https://mizt.xyz), focused on SUI coin transfers today, but extensible to any Sui object.
 
 ## 🌱 Future Improvements:
 
