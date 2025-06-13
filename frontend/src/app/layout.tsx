@@ -1,5 +1,6 @@
 import "@/styles/globals.css"
 
+import { Suspense } from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist_Mono } from "next/font/google"
 import localFont from "next/font/local"
@@ -104,7 +105,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
           // enableSystem
           disableTransitionOnChange
         >
-          <Providers>{children}</Providers>
+          <Providers>
+            <Suspense>{children}</Suspense>
+          </Providers>
           <Toaster />
         </ThemeProvider>
       </body>
