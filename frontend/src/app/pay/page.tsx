@@ -18,7 +18,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const previousImages = (await parent).openGraph?.images || []
-  const { message, amount, coin, key } = await searchParams
+  const { message, amount, coin } = await searchParams
   const ticker = CURRENCIES.find((c) => c.coinType === coin)?.ticker
   return {
     title: `${amount} ${ticker} - "${message}"`,
@@ -36,13 +36,8 @@ export async function generateMetadata(
   }
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { message: string; amount: string; coin: string; key: string }
-}) {
-  const { message, amount, coin, key } = searchParams
-  const ticker = CURRENCIES.find((c) => c.coinType === coin)?.ticker
+export default async function Page({ searchParams }: Props) {
+  const { message, amount, coin, key } = await searchParams
   return redirect(
     `/?message=${message}&amount=${amount}&coin=${coin}&key=${key}`
   )
