@@ -1,25 +1,37 @@
-import { Metadata } from "next"
+import { Metadata, ResolvingMetadata } from "next"
 import { redirect } from "next/navigation"
 
 import { CURRENCIES } from "@/config/currency"
 import { siteConfig } from "@/config/site"
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: { message: string; amount: string; coin: string; key: string }
-}): Promise<Metadata> {
-  const { message, amount, coin, key } = searchParams
+type Props = {
+  searchParams: Promise<{
+    message: string
+    amount: string
+    coin: string
+    key: string
+  }>
+}
+
+export async function generateMetadata(
+  { searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const previousImages = (await parent).openGraph?.images || []
+  const { message, amount, coin, key } = await searchParams
   const ticker = CURRENCIES.find((c) => c.coinType === coin)?.ticker
   return {
     title: `${amount} ${ticker} - "${message}"`,
     description: `Private payment requested by a Mizt account, ${amount} ${ticker}. "${message}"`,
     openGraph: {
-      images: {
-        url: siteConfig.ogRequestPaymentImage,
-        width: 1200,
-        height: 630,
-      },
+      images: [
+        ...previousImages,
+        {
+          url: siteConfig.ogRequestPaymentImage,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   }
 }
