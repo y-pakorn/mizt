@@ -18,6 +18,7 @@
     "@next/third-parties": "^15.2.4",
     "@noble/curves": "^1.9.0",
     "@noble/hashes": "^1.8.0",
+    "@noble/secp256k1": "^2.3.0",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-label": "^2.1.7",

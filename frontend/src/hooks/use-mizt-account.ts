@@ -11,6 +11,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
 import { contract } from "@/config/contract"
+import { recoverStealthPrivateKey } from "@/lib/crypto"
 
 interface MiztKey {
   address: string
@@ -113,20 +114,12 @@ export const useMiztAccount = create<MiztAccountState>()(
 
           // for each pubkey, try to match with existing key
           for (const pubkey of pubkeys) {
-            const sharedSecret = secp256k1.ProjectivePoint.fromHex(
-              pubkey.ephemeral
-            )
-              .multiply(secp256k1.CURVE.Fp.fromBytes(new Uint8Array(key.priv)))
-              .toRawBytes()
-            const addrPrivateKey = secp256k1.CURVE.Fp.toBytes(
-              secp256k1.CURVE.Fp.add(
-                secp256k1.CURVE.Fp.fromBytes(new Uint8Array(key.priv)),
-                secp256k1.CURVE.Fp.fromBytes(keccak_256(sharedSecret))
-              )
+            const addrPrivateKey = recoverStealthPrivateKey(
+              pubkey.ephemeral,
+              new Uint8Array(key.priv)
             )
             const keypair = Secp256k1Keypair.fromSecretKey(addrPrivateKey)
             const addr = keypair.toSuiAddress()
-            console.log(addr, pubkey.addr)
             if (addr === pubkey.addr) {
               key.accounts[addr] = {
                 suiPriv: [...addrPrivateKey],

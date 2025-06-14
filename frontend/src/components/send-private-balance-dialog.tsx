@@ -25,6 +25,10 @@ import { toast } from "sonner"
 
 import { contract } from "@/config/contract"
 import { CURRENCIES, SUI_CURRENCY } from "@/config/currency"
+import {
+  generateStealthAddress,
+  generateStealthAddressEpimeral,
+} from "@/lib/crypto"
 import { cn } from "@/lib/utils"
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztKey } from "@/hooks/use-mizt-key"
@@ -102,21 +106,15 @@ export function SendPrivateBalanceDialog({
         try {
           const trimmed = recipient.replace(/^mizt/, "")
           const decoded = base58.decode(trimmed)
-          const epimeralKey = decoded.slice(0, 32)
-          const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
-          const meta = decoded.slice(32)
-          const sharedSecret = secp256k1.getSharedSecret(epimeralKey, meta)
-          const hashedSharedSecret = keccak_256(sharedSecret)
-          const hashedSharedSecretPubkey =
-            secp256k1.getPublicKey(hashedSharedSecret)
-          const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
-            .add(secp256k1.ProjectivePoint.fromHex(hashedSharedSecretPubkey))
-            .toRawBytes()
-          const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
+          const epimeralKey = new Uint8Array(decoded.slice(0, 32))
+          const meta = new Uint8Array(decoded.slice(32))
+          const { stealthPub, ephPub, sharedSecret } =
+            generateStealthAddressEpimeral(meta, epimeralKey)
+          const addr = new Secp256k1PublicKey(stealthPub).toSuiAddress()
           return {
             name: undefined,
             pubkey: {
-              epimeralPubkey,
+              epimeralPubkey: ephPub,
               sharedSecret,
               addr,
             },
@@ -137,25 +135,14 @@ export function SendPrivateBalanceDialog({
   const [nonce, setNonce] = useState<number>(0)
   const namePubkey = useMemo(() => {
     if (!_namePubkey.data) return null
-    const meta = new Uint8Array(_namePubkey.data.pub)
-    const epimeralKey = secp256k1.utils.randomPrivateKey()
-    const epimeralPubkey = secp256k1.getPublicKey(epimeralKey)
-    const sharedSecret = secp256k1.ProjectivePoint.fromHex(meta).multiply(
-      secp256k1.CURVE.Fp.fromBytes(epimeralKey)
+    const { stealthPub, ephPub, mizt, sharedSecret } = generateStealthAddress(
+      new Uint8Array(_namePubkey.data.pub)
     )
-    const mizt = base58.encode(new Uint8Array([...epimeralKey, ...meta]))
-    const hashedSharedSecret = secp256k1.CURVE.Fp.fromBytes(
-      keccak_256(sharedSecret.toRawBytes())
-    )
-    const hashedSharedSecretPubkey = secp256k1.getPublicKey(hashedSharedSecret)
-    const addrPubkey = secp256k1.ProjectivePoint.fromHex(meta)
-      .add(secp256k1.ProjectivePoint.fromHex(hashedSharedSecretPubkey))
-      .toRawBytes()
-    const addr = new Secp256k1PublicKey(addrPubkey).toSuiAddress()
+    const addr = new Secp256k1PublicKey(stealthPub).toSuiAddress()
     return {
-      epimeralPubkey,
+      epimeralPubkey: ephPub,
       sharedSecret,
-      mizt: `mizt${mizt}`,
+      mizt,
       addr,
     }
   }, [_namePubkey.data, nonce])

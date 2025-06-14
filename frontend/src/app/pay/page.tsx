@@ -23,14 +23,12 @@ export async function generateMetadata(
     title: `${amount} ${ticker} - "${message}"`,
     description: `Private payment requested by a Mizt account, ${amount} ${ticker}. "${message}"`,
     openGraph: {
-      images: [
-        {
-          url: siteConfig.ogRequestPaymentImage,
-          width: 1200,
-          height: 630,
-          alt: `${amount} ${ticker} - "${message}"`,
-        },
-      ],
+      images: {
+        url: siteConfig.ogRequestPaymentImage,
+        width: 1200,
+        height: 630,
+        alt: `${amount} ${ticker} - "${message}"`,
+      },
     },
   }
 }
