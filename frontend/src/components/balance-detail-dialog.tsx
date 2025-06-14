@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog"
+import { ScrollArea } from "./ui/scroll-area"
 
 export function BalanceDetailDialog({
   coinType,
@@ -40,54 +41,59 @@ export function BalanceDetailDialog({
           <DialogTitle>Balance Detail</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[500px] space-y-2">
-          {Object.entries(balances).map(([address, balance]) => (
-            <div key={address}>
-              <div className="flex items-center gap-2">
-                <span className="truncate font-mono">
-                  {address.slice(0, 26)}
-                </span>
-                <Link
-                  href={`${contract.blockExplorer}/address/${address}`}
-                  target="_blank"
-                >
-                  <Button variant="ghost" size="iconXs">
-                    <ArrowUpRight />
-                  </Button>
-                </Link>
-                <div className="ml-auto font-medium">{balance}</div>
-                <img
-                  src={currency?.logo}
-                  alt={currency?.name}
-                  className="size-4 shrink-0 rounded-full"
-                />
-              </div>
-              <div className="text-muted-foreground line truncate text-xs">
-                Private Key:{" "}
-                <span className="font-mono">
-                  {toHex(
-                    new Uint8Array(key?.accounts[address].suiPriv || [])
-                  ).slice(0, 16)}
-                  ...
-                </span>
-                <Button
-                  variant="ghost"
-                  size="iconXs"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      toHex(
-                        new Uint8Array(key?.accounts[address].suiPriv || [])
+        <ScrollArea
+          className="h-full max-h-[500px] overflow-y-auto"
+          type="hover"
+        >
+          <div className="grid space-y-2">
+            {Object.entries(balances).map(([address, balance]) => (
+              <div key={address}>
+                <div className="flex items-center gap-2">
+                  <span className="truncate font-mono">
+                    {address.slice(0, 26)}
+                  </span>
+                  <Link
+                    href={`${contract.blockExplorer}/address/${address}`}
+                    target="_blank"
+                  >
+                    <Button variant="ghost" size="iconXs">
+                      <ArrowUpRight />
+                    </Button>
+                  </Link>
+                  <div className="ml-auto font-medium">{balance}</div>
+                  <img
+                    src={currency?.logo}
+                    alt={currency?.name}
+                    className="size-4 shrink-0 rounded-full"
+                  />
+                </div>
+                <div className="text-muted-foreground line truncate text-xs">
+                  Private Key:{" "}
+                  <span className="font-mono">
+                    {toHex(
+                      new Uint8Array(key?.accounts[address].suiPriv || [])
+                    ).slice(0, 16)}
+                    ...
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="iconXs"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        toHex(
+                          new Uint8Array(key?.accounts[address].suiPriv || [])
+                        )
                       )
-                    )
-                    toast.success("Private key copied to clipboard")
-                  }}
-                >
-                  <Copy />
-                </Button>
+                      toast.success("Private key copied to clipboard")
+                    }}
+                  >
+                    <Copy />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </DialogContent>
       {children}
     </Dialog>
