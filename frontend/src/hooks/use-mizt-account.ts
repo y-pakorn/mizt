@@ -172,7 +172,7 @@ export const useMiztAccount = create<MiztAccountState>()(
     }),
 
     {
-      name: "mizt-account-2",
+      name: `mizt-account-2-${contract.version}`,
     }
   )
 )

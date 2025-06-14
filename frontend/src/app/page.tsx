@@ -516,11 +516,7 @@ export default function Home() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <motion.div
-                        className="mr-auto truncate"
-                        animate={{ color: ["#6b7280", "#10b981", "#6b7280"] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
+                      <motion.div className="mr-auto truncate">
                         {namePubkey.mizt}
                       </motion.div>
                       <motion.div
