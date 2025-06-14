@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCurrentAccount, useSignPersonalMessage } from "@mysten/dapp-kit"
 import { toBytes } from "@noble/hashes/utils"
+import { AnimatePresence, motion } from "framer-motion"
 import _ from "lodash"
 import {
   ArrowRight,
@@ -29,8 +30,14 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   BalanceDetailDialog,
   BalanceDetailDialogTrigger,
@@ -104,241 +111,508 @@ export default function Me() {
     mizt.generateKey(signature.signature, currentAccount.address)
   }
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  }
+
+  const logoVariants = {
+    hidden: { opacity: 0, scale: 0.8, rotate: -10 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  }
+
   if (!currentAccount || !key) {
     return (
-      <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
-        <Link href="/">
-          <h2 className="inline-flex items-center gap-1">
-            <img src="/logo.webp" alt="Mizt" className="size-7" />
-            <span className="text-2xl font-semibold italic">mizt</span>
-          </h2>
-        </Link>
+      <motion.main
+        className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={logoVariants}>
+          <Link href="/">
+            <motion.h2
+              className="inline-flex items-center gap-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <motion.img
+                src="/logo.webp"
+                alt="Mizt"
+                className="size-7"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              />
+              <span className="text-2xl font-semibold italic">mizt</span>
+            </motion.h2>
+          </Link>
+        </motion.div>
 
-        <h1 className="text-5xl font-stretch-condensed">
+        <motion.h1
+          className="text-center text-5xl font-stretch-condensed"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
           Sign In To Access Your <span className="font-bold italic">Mizt</span>{" "}
           Account
-        </h1>
-        <p className="text-muted-foreground">
+        </motion.h1>
+        <motion.p
+          className="text-muted-foreground text-center"
+          variants={itemVariants}
+        >
           Generate your own mizt account, manage your private assets, and more.
-        </p>
-        {!currentAccount && (
-          <ConnectWalletDialog>
-            <ConnectWalletDialogTrigger asChild>
-              <Button size="lg">Connect Wallet</Button>
-            </ConnectWalletDialogTrigger>
-          </ConnectWalletDialog>
-        )}
-        {currentAccount && !key && (
-          <Button onClick={signAndGenerate}>
-            Sign Message To Generate Account
-          </Button>
-        )}
-      </main>
+        </motion.p>
+        <AnimatePresence mode="wait">
+          {!currentAccount && (
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ConnectWalletDialog>
+                <ConnectWalletDialogTrigger asChild>
+                  <Button size="lg">Connect Wallet</Button>
+                </ConnectWalletDialogTrigger>
+              </ConnectWalletDialog>
+            </motion.div>
+          )}
+          {currentAccount && !key && (
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button onClick={signAndGenerate}>
+                Sign Message To Generate Account
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.main>
     )
   }
 
   return (
-    <main className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8">
-      <Link href="/">
-        <h2 className="inline-flex items-center gap-1">
-          <img src="/logo.webp" alt="Mizt" className="size-7" />
-          <span className="text-2xl font-semibold italic">mizt</span>
-        </h2>
-      </Link>
-      <h1 className="inline-flex items-center gap-2 text-5xl font-stretch-condensed">
+    <motion.main
+      className="container flex min-h-screen flex-col items-center justify-center gap-4 py-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={logoVariants}>
         <Link href="/">
-          <ChevronLeft className="size-8" />
+          <motion.h2
+            className="inline-flex items-center gap-1"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.img
+              src="/logo.webp"
+              alt="Mizt"
+              className="size-7"
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.6 }}
+            />
+            <span className="text-2xl font-semibold italic">mizt</span>
+          </motion.h2>
         </Link>
-        Your <span className="font-bold italic">Mizt</span> Account
-      </h1>
-      <p className="text-muted-foreground">
-        Manage your Mizt account and transactions.
-      </p>
-      <div className="flex items-center gap-4">
-        <Button size="sm" variant="outlineTranslucent">
-          {mizt.isSyncing ? (
-            <>
-              Syncing <div className="size-2 rounded-full bg-orange-400" />
-            </>
-          ) : (
-            <>
-              Active <div className="size-2 rounded-full bg-green-400" />
-            </>
-          )}
-        </Button>
-        <Button
-          size="sm"
-          variant="outlineTranslucent"
-          onClick={() => {
-            navigator.clipboard.writeText(currentAccount.address)
-            toast.success("Address copied to clipboard")
-          }}
-        >
-          Copy Address <Copy />
-        </Button>
+      </motion.div>
 
-        <SwitchAccountButton />
-        <DisconnectButton />
-      </div>
-      <div className="w-[500px] space-y-2">
+      <motion.h1
+        className="inline-flex items-center gap-2 text-5xl font-stretch-condensed"
+        variants={itemVariants}
+      >
+        <motion.div
+          whileHover={{ scale: 1.1, x: -5 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Link href="/">
+            <ChevronLeft className="size-8" />
+          </Link>
+        </motion.div>
+        <span>
+          Your <span className="font-bold italic">Mizt</span> Account
+        </span>
+      </motion.h1>
+
+      <motion.p className="text-muted-foreground" variants={itemVariants}>
+        Manage your Mizt account and transactions.
+      </motion.p>
+
+      <motion.div className="flex items-center gap-4" variants={itemVariants}>
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <Button size="sm" variant="outlineTranslucent">
+            <AnimatePresence mode="wait">
+              {mizt.isSyncing ? (
+                <motion.div
+                  key="syncing"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-2"
+                >
+                  Syncing{" "}
+                  <motion.div
+                    className="size-2 rounded-full bg-orange-400"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.1, repeat: Infinity }}
+                  />
+                </motion.div>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.div
+                      key="active"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex cursor-pointer items-center gap-2"
+                      onClick={() => {
+                        mizt.sync(currentAccount.address)
+                      }}
+                    >
+                      Active{" "}
+                      <motion.div
+                        className="size-2 rounded-full bg-green-400"
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 0.1, repeat: Infinity }}
+                      />
+                    </motion.div>
+                  </TooltipTrigger>
+                  <TooltipContent>Sync your Mizt account</TooltipContent>
+                </Tooltip>
+              )}
+            </AnimatePresence>
+          </Button>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            size="sm"
+            variant="outlineTranslucent"
+            onClick={() => {
+              navigator.clipboard.writeText(currentAccount.address)
+              toast.success("Address copied to clipboard")
+            }}
+          >
+            Copy Address <Copy />
+          </Button>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <SwitchAccountButton />
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <DisconnectButton />
+        </motion.div>
+      </motion.div>
+
+      <motion.div className="w-[500px] space-y-2" variants={itemVariants}>
         <Tabs defaultValue="name">
-          <Card>
-            <CardContent className="space-y-2">
-              <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
-                <span className="font-bold! italic">Mizt</span>
-                <TabsList className="h-7 px-0.5 *:h-6 *:px-2 *:text-xs">
-                  <TabsTrigger value="name">Name</TabsTrigger>
-                  <TabsTrigger value="address">Address</TabsTrigger>
-                </TabsList>
-              </CardTitle>
-              <div className="h-12 text-2xl *:flex *:items-center *:justify-end *:gap-2">
-                <TabsContent value="address">
-                  <div className="mr-auto truncate">{key.mizt}</div>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    onClick={() => {
-                      mizt.generateNewAddress(currentAccount.address)
-                    }}
-                  >
-                    <RefreshCcw />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(key.mizt)
-                      toast.success("Mizt address copied to clipboard")
-                    }}
-                  >
-                    <Copy />
-                  </Button>
-                  <CreatePaymentLinkDialog>
-                    <CreatePaymentLinkDialogTrigger asChild>
-                      <Button variant="outlineTranslucent">
-                        Create Payment Link
+          <motion.div
+            variants={cardVariants}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <Card>
+              <CardContent className="space-y-2">
+                <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <span className="font-bold! italic">Mizt</span>
+                  <motion.div>
+                    <TabsList className="h-7 px-0.5 *:h-6 *:px-2 *:text-xs">
+                      <TabsTrigger value="name">Name</TabsTrigger>
+                      <TabsTrigger value="address">Address</TabsTrigger>
+                    </TabsList>
+                  </motion.div>
+                </CardTitle>
+                <div className="h-12 text-2xl *:flex *:items-center *:justify-end *:gap-2">
+                  <TabsContent value="address">
+                    <motion.div className="mr-auto truncate">
+                      {key.mizt}
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 180 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={() => {
+                          mizt.generateNewAddress(currentAccount.address)
+                        }}
+                      >
+                        <RefreshCcw />
                       </Button>
-                    </CreatePaymentLinkDialogTrigger>
-                  </CreatePaymentLinkDialog>
-                </TabsContent>
-                <TabsContent value="name">
-                  {miztName.isPending ? (
-                    <Skeleton className="mr-auto h-9 w-full" />
-                  ) : miztName.data ? (
-                    <div className="mr-auto truncate">{miztName.data}.mizt</div>
-                  ) : (
-                    <div className="text-muted-foreground flex w-full items-center justify-between gap-2">
-                      <div>
-                        Setup Your{" "}
-                        <span className="font-bold italic">Mizt</span> Name
-                      </div>
-                      <MoveRight className="size-8" />
-                    </div>
-                  )}
-                  <SetNameDialog>
-                    <SetNameDialogTrigger asChild>
-                      <Button size="icon" variant="outline">
-                        {miztName.data ? <Pencil /> : <Plus />}
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(key.mizt)
+                          toast.success("Mizt address copied to clipboard")
+                        }}
+                      >
+                        <Copy />
                       </Button>
-                    </SetNameDialogTrigger>
-                  </SetNameDialog>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${miztName.data}.mizt`)
-                      toast.success("Mizt name copied to clipboard")
-                    }}
-                  >
-                    <Copy />
-                  </Button>
-                </TabsContent>
-              </div>
-            </CardContent>
-          </Card>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <CreatePaymentLinkDialog>
+                        <CreatePaymentLinkDialogTrigger asChild>
+                          <Button variant="outlineTranslucent">
+                            Create Payment Link
+                          </Button>
+                        </CreatePaymentLinkDialogTrigger>
+                      </CreatePaymentLinkDialog>
+                    </motion.div>
+                  </TabsContent>
+                  <TabsContent value="name">
+                    <AnimatePresence mode="wait">
+                      {miztName.isPending ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="mr-auto"
+                        >
+                          <Skeleton className="h-9 w-full" />
+                        </motion.div>
+                      ) : miztName.data ? (
+                        <motion.div
+                          key="name"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="mr-auto truncate"
+                        >
+                          {miztName.data}.mizt
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="setup"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="text-muted-foreground flex w-full items-center justify-between gap-2"
+                        >
+                          <div>
+                            Setup Your{" "}
+                            <span className="font-bold italic">Mizt</span> Name
+                          </div>
+                          <motion.div
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            <MoveRight className="size-8" />
+                          </motion.div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <SetNameDialog>
+                        <SetNameDialogTrigger asChild>
+                          <Button size="icon" variant="outline">
+                            {miztName.data ? <Pencil /> : <Plus />}
+                          </Button>
+                        </SetNameDialogTrigger>
+                      </SetNameDialog>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${miztName.data}.mizt`)
+                          toast.success("Mizt name copied to clipboard")
+                        }}
+                      >
+                        <Copy />
+                      </Button>
+                    </motion.div>
+                  </TabsContent>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Tabs>
 
-        <Card>
-          <CardContent className="space-y-2">
-            <CardTitle className="text-muted-foreground text-sm">
-              Balances
-            </CardTitle>
-            <CardDescription></CardDescription>
-            <div className="grid max-h-[200px] grid-cols-2 gap-2 overflow-y-auto">
-              {privateBalances.isPending ? (
-                _.range(2).map((i) => (
-                  <Skeleton key={i} className="h-18 w-full" />
-                ))
-              ) : !privateBalances.data ||
-                !_.size(privateBalances.data?.coins) ? (
-                <div className="text-muted-foreground/25 col-span-2 flex h-18 items-center justify-center text-center">
-                  No balances here yet.
-                </div>
-              ) : (
-                _.entries(privateBalances.data?.coins).map(
-                  ([coinType, { total, byAccount }]) => {
-                    const currency = CURRENCIES.find(
-                      (c) => c.coinType === coinType
-                    )
-                    if (!currency) return null
-                    return (
-                      <div
-                        key={coinType}
-                        className="bg-background/30 rounded-lg p-3"
+        <motion.div variants={cardVariants} whileHover={{ scale: 1.02, y: -5 }}>
+          <Card>
+            <CardContent className="space-y-2">
+              <CardTitle className="text-muted-foreground text-sm">
+                Balances
+              </CardTitle>
+              <CardDescription></CardDescription>
+              <ScrollArea className="h-full max-h-[200px]">
+                <div className="grid grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto">
+                  <AnimatePresence mode="wait">
+                    {privateBalances.isPending ? (
+                      _.range(2).map((i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.1 }}
+                        >
+                          <Skeleton className="h-18 w-full" />
+                        </motion.div>
+                      ))
+                    ) : !privateBalances.data ||
+                      !_.size(privateBalances.data?.coins) ? (
+                      <motion.div
+                        className="text-muted-foreground/25 col-span-2 flex h-18 items-center justify-center text-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
                       >
-                        <div className="flex items-center gap-1">
-                          <div className="truncate font-medium">
-                            {total.toLocaleString()}
-                          </div>
-                          <img
-                            src={currency.logo}
-                            alt={currency.name}
-                            className="ml-auto size-3 shrink-0 rounded-full"
-                          />
-                          <div className="text-sm font-semibold">
-                            {currency.ticker}
-                          </div>
-                          <SendPrivateBalanceDialog
-                            coinType={coinType}
-                            total={total}
-                            balances={byAccount}
-                          >
-                            <SendPrivateBalanceDialogTrigger asChild>
-                              <Button
-                                variant="outlineTranslucent"
-                                size="iconXs"
-                              >
-                                <ArrowRight />
-                              </Button>
-                            </SendPrivateBalanceDialogTrigger>
-                          </SendPrivateBalanceDialog>
-                        </div>
-                        <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                          <div>{_.size(byAccount)} accounts</div>
-                          <BalanceDetailDialog
-                            coinType={coinType}
-                            balances={byAccount}
-                          >
-                            <BalanceDetailDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="iconXs"
-                                className="ml-auto"
-                              >
-                                <Eye />
-                              </Button>
-                            </BalanceDetailDialogTrigger>
-                          </BalanceDetailDialog>
-                        </div>
-                      </div>
-                    )
-                  }
-                )
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+                        No balances here yet.
+                      </motion.div>
+                    ) : (
+                      _.entries(privateBalances.data?.coins).map(
+                        ([coinType, { total, byAccount }], index) => {
+                          const currency = CURRENCIES.find(
+                            (c) => c.coinType === coinType
+                          )
+                          if (!currency) return null
+                          return (
+                            <motion.div
+                              key={coinType}
+                              className="bg-background/30 rounded-lg p-3"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.1, duration: 0.5 }}
+                            >
+                              <div className="flex items-center gap-1">
+                                <motion.div
+                                  className="truncate font-medium"
+                                  animate={{
+                                    scale: [1, 1.05, 1],
+                                  }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  {total.toLocaleString()}
+                                </motion.div>
+                                <motion.img
+                                  src={currency.logo}
+                                  alt={currency.name}
+                                  className="ml-auto size-3 shrink-0 rounded-full"
+                                  whileHover={{ rotate: 360 }}
+                                  transition={{ duration: 0.6 }}
+                                />
+                                <div className="text-sm font-semibold">
+                                  {currency.ticker}
+                                </div>
+                                <motion.div
+                                  whileHover={{ scale: 1.2 }}
+                                  whileTap={{ scale: 0.8 }}
+                                >
+                                  <SendPrivateBalanceDialog
+                                    coinType={coinType}
+                                    total={total}
+                                    balances={byAccount}
+                                  >
+                                    <SendPrivateBalanceDialogTrigger asChild>
+                                      <Button
+                                        variant="outlineTranslucent"
+                                        size="iconXs"
+                                      >
+                                        <ArrowRight />
+                                      </Button>
+                                    </SendPrivateBalanceDialogTrigger>
+                                  </SendPrivateBalanceDialog>
+                                </motion.div>
+                              </div>
+                              <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                                <div>{_.size(byAccount)} accounts</div>
+                                <motion.div
+                                  className="ml-auto"
+                                  whileHover={{ scale: 1.2 }}
+                                  whileTap={{ scale: 0.8 }}
+                                >
+                                  <BalanceDetailDialog
+                                    coinType={coinType}
+                                    balances={byAccount}
+                                  >
+                                    <BalanceDetailDialogTrigger asChild>
+                                      <Button variant="ghost" size="iconXs">
+                                        <Eye />
+                                      </Button>
+                                    </BalanceDetailDialogTrigger>
+                                  </BalanceDetailDialog>
+                                </motion.div>
+                              </div>
+                            </motion.div>
+                          )
+                        }
+                      )
+                    )}
+                  </AnimatePresence>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+    </motion.main>
   )
 }

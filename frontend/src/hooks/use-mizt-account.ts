@@ -153,6 +153,7 @@ export const useMiztAccount = create<MiztAccountState>()(
             cursor = events.nextCursor
           }
         }
+        await new Promise((resolve) => setTimeout(resolve, 500))
         set({
           isSyncing: false,
         })

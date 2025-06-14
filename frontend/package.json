@@ -25,6 +25,7 @@
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.9",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@scure/base": "^1.2.5",
     "@shinami/clients": "^0.9.6",
     "@t3-oss/env-nextjs": "^0.12.0",
