@@ -44,7 +44,7 @@ fun new_ephemeral_pub(mizt: &mut Mizt, ephemeral_pub: vector<u8>, addr: address)
 }
 
 public fun register_name(mizt: &mut Mizt, name: String, pub: vector<u8>, ctx: &mut TxContext) {
-    assert!(!mizt.name_owners.contains(ctx.sender()), ENameAlreadyRegistered);
+    assert!(!mizt.names.contains(name), ENameAlreadyRegistered);
 
     // remove old name if exists
     if (mizt.name_owners.contains(ctx.sender())) {

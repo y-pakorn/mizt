@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { contract } from "@/config/contract"
 import { CURRENCIES } from "@/config/currency"
 import { useMiztAccount } from "@/hooks/use-mizt-account"
 import { useMiztKey } from "@/hooks/use-mizt-key"
@@ -234,6 +235,17 @@ export default function Me() {
               </Button>
             </motion.div>
           )}
+
+          <motion.div
+            key="version"
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="text-muted-foreground text-center font-mono text-xs">
+              Protocol Version: {contract.version}
+            </div>
+          </motion.div>
         </AnimatePresence>
       </motion.main>
     )
@@ -612,6 +624,16 @@ export default function Me() {
             </CardContent>
           </Card>
         </motion.div>
+      </motion.div>
+      <motion.div
+        key="version"
+        variants={itemVariants}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="text-muted-foreground text-center font-mono text-xs">
+          Protocol Version: {contract.version}
+        </div>
       </motion.div>
     </motion.main>
   )

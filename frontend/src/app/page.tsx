@@ -651,6 +651,16 @@ export default function Home() {
           </Button>
         </Link>
       </motion.div>
+
+      <motion.div
+        variants={itemVariants}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="text-muted-foreground text-center font-mono text-xs">
+          Protocol Version: {contract.version}
+        </div>
+      </motion.div>
     </motion.main>
   )
 }
