@@ -1,4 +1,5 @@
 import { ComponentProps, useMemo, useState } from "react"
+import { base58 } from "@scure/base"
 import { ChevronDown, Link } from "lucide-react"
 import { toast } from "sonner"
 
@@ -115,7 +116,13 @@ export function CreatePaymentLinkDialog({
                 toast.error("Please generate a Mizt address first")
                 return
               }
-              const link = `${env.NEXT_PUBLIC_APP_URL}/pay?message=${encodeURIComponent(message)}&amount=${amountNumber}&coin=${coin.coinType}&key=${key.mizt}`
+              const data = JSON.stringify({
+                message,
+                amount: amountNumber,
+                coin: coin.coinType,
+                key: key.mizt,
+              })
+              const link = `${env.NEXT_PUBLIC_APP_URL}/pay/${base58.encode(new TextEncoder().encode(data))}`
               navigator.clipboard.writeText(link)
               toast.success("Link copied to clipboard")
             }}

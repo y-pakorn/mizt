@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -8,13 +8,8 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit"
-import {
-  Secp256k1Keypair,
-  Secp256k1PublicKey,
-} from "@mysten/sui/keypairs/secp256k1"
+import { Secp256k1PublicKey } from "@mysten/sui/keypairs/secp256k1"
 import { Transaction } from "@mysten/sui/transactions"
-import { secp256k1 } from "@noble/curves/secp256k1"
-import { keccak_256 } from "@noble/hashes/sha3"
 import { base58 } from "@scure/base"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { BigNumber } from "bignumber.js"
