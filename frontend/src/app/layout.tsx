@@ -110,11 +110,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </Providers>
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
       {env.NEXT_PUBLIC_GA_ID && (
         <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_ID} />
       )}
-      <Analytics />
     </html>
   )
 }
